@@ -566,6 +566,65 @@ export const API_CONFIG = {
     UNIT_SUGGEST: '/inventory/units/suggest/',
   },
 
+  // ==================== BOOKINGS ====================
+  BOOKINGS: {
+    LIST: '/bookings/',
+    CREATE: '/bookings/',
+    DETAIL: '/bookings/:id/',
+    UPDATE: '/bookings/:id/',
+    MILESTONES: '/bookings/:id/milestones/',
+    MARK_PAID: '/bookings/:id/milestones/:mid/mark-paid/',
+    SUMMARY: '/bookings/summary/',
+    UPCOMING_PAYMENTS: '/bookings/upcoming-payments/',
+    DEMAND_LETTER_DATA: '/bookings/:id/demand-letter-data/',
+    RECEIPT_DATA: '/bookings/:id/milestones/:mid/receipt-data/',
+  },
+
+  // ==================== PAYMENT PLAN TEMPLATES ====================
+  PAYMENT_PLAN_TEMPLATES: {
+    LIST: '/tenant/payment-plan-templates/',
+    CREATE: '/tenant/payment-plan-templates/',
+    DETAIL: '/tenant/payment-plan-templates/:id/',
+    UPDATE: '/tenant/payment-plan-templates/:id/',
+    DELETE: '/tenant/payment-plan-templates/:id/',
+    SET_DEFAULT: '/tenant/payment-plan-templates/:id/set-default/',
+    PREVIEW: '/tenant/payment-plan-templates/preview/',
+  },
+
+  // ==================== BROKERS ====================
+  BROKERS: {
+    LIST: '/brokers/brokers/',
+    CREATE: '/brokers/brokers/',
+    DETAIL: '/brokers/brokers/:id/',
+    UPDATE: '/brokers/brokers/:id/',
+    DELETE: '/brokers/brokers/:id/',
+    LEADERBOARD: '/brokers/brokers/leaderboard/',
+    BROKER_LEADS: '/brokers/brokers/:id/leads/',
+    BROKER_COMMISSIONS: '/brokers/brokers/:id/commissions/',
+    COMMISSIONS: '/brokers/commissions/',
+    COMMISSION_DETAIL: '/brokers/commissions/:id/',
+    COMMISSION_MARK_PAID: '/brokers/commissions/:id/mark-paid/',
+  },
+
+  // ==================== ANALYTICS ====================
+  ANALYTICS: {
+    OVERVIEW: '/analytics/overview/',
+    INVENTORY: '/analytics/inventory/',
+    SALES_FUNNEL: '/analytics/sales-funnel/',
+    REVENUE: '/analytics/revenue/',
+    AGENT_LEADERBOARD: '/analytics/agent-leaderboard/',
+    LEAD_SOURCES: '/analytics/lead-sources/',
+  },
+
+  // ==================== AD-HOC PAYMENTS ====================
+  PAYMENTS_ADHOC: {
+    LIST: '/payments/',
+    CREATE: '/payments/',
+    DETAIL: '/payments/:id/',
+    UPDATE: '/payments/:id/',
+    DELETE: '/payments/:id/',
+  },
+
   // ==================== TENANT SETTINGS (Real Estate) ====================
   TENANT_SETTINGS: {
     GET: '/tenant/settings/',

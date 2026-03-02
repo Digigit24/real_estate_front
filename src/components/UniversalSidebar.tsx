@@ -12,6 +12,10 @@ import {
   Building2,
   Building,
   Activity,
+  BarChart3,
+  Receipt,
+  Handshake,
+  IndianRupee,
   MessageCircle,
   FileText,
   Send,
@@ -79,6 +83,32 @@ const menuSections: MenuSection[] = [
         children: [
           { id: "inventory-projects", label: "Projects", icon: Building2, path: "/inventory/projects" },
         ],
+      },
+      {
+        id: "bookings",
+        label: "Bookings",
+        icon: Receipt,
+        module: "crm",
+        children: [
+          { id: "bookings-list", label: "All Bookings", icon: Receipt, path: "/bookings" },
+        ],
+      },
+      {
+        id: "brokers",
+        label: "Brokers",
+        icon: Handshake,
+        module: "crm",
+        children: [
+          { id: "brokers-list", label: "All Brokers", icon: Users, path: "/brokers" },
+          { id: "brokers-commissions", label: "Commissions", icon: IndianRupee, path: "/brokers/commissions" },
+        ],
+      },
+      {
+        id: "analytics",
+        label: "Analytics",
+        icon: BarChart3,
+        path: "/analytics",
+        module: "crm",
       },
       {
         id: "tenant-settings",

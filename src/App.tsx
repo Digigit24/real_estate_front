@@ -50,6 +50,17 @@ import { TowerUnitGrid } from "./pages/TowerUnitGrid";
 import { TenantSettingsPage } from "./pages/TenantSettingsPage";
 import { useFirstLogin } from "./hooks/useFirstLogin";
 
+// Bookings & Payments
+import { Bookings } from "./pages/Bookings";
+import { BookingDetail } from "./pages/BookingDetail";
+
+// Brokers
+import { Brokers } from "./pages/Brokers";
+import { Commissions } from "./pages/Commissions";
+
+// Analytics
+import { Analytics } from "./pages/Analytics";
+
 import { WebSocketProvider } from "./context/WebSocketProvider";
 import { RealtimeChatProvider } from "./context/RealtimeChatProvider";
 import { OAuthCallback } from "./pages/OAuthCallback";
@@ -103,6 +114,17 @@ const AppLayout = () => {
               <Route path="/inventory/projects" element={<ModuleProtectedRoute requiredModule="crm"><Projects /></ModuleProtectedRoute>} />
               <Route path="/inventory/projects/:id" element={<ModuleProtectedRoute requiredModule="crm"><ProjectDetail /></ModuleProtectedRoute>} />
               <Route path="/inventory/projects/:id/towers/:towerId" element={<ModuleProtectedRoute requiredModule="crm"><TowerUnitGrid /></ModuleProtectedRoute>} />
+
+              {/* Bookings & Payments Routes */}
+              <Route path="/bookings" element={<ModuleProtectedRoute requiredModule="crm"><Bookings /></ModuleProtectedRoute>} />
+              <Route path="/bookings/:id" element={<ModuleProtectedRoute requiredModule="crm"><BookingDetail /></ModuleProtectedRoute>} />
+
+              {/* Brokers Routes */}
+              <Route path="/brokers" element={<ModuleProtectedRoute requiredModule="crm"><Brokers /></ModuleProtectedRoute>} />
+              <Route path="/brokers/commissions" element={<ModuleProtectedRoute requiredModule="crm"><Commissions /></ModuleProtectedRoute>} />
+
+              {/* Analytics Route */}
+              <Route path="/analytics" element={<ModuleProtectedRoute requiredModule="crm"><Analytics /></ModuleProtectedRoute>} />
 
               {/* Tenant Settings (Real Estate) */}
               <Route path="/settings/tenant" element={<ModuleProtectedRoute requiredModule="crm"><TenantSettingsPage /></ModuleProtectedRoute>} />
