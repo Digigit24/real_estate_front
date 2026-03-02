@@ -10,6 +10,7 @@ import {
   ClipboardList,
   X,
   Building2,
+  Building,
   Activity,
   MessageCircle,
   FileText,
@@ -28,6 +29,8 @@ import {
   Loader2,
   PanelLeftClose,
   PanelLeft,
+  Home,
+  Palette,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -62,6 +65,27 @@ const menuSections: MenuSection[] = [
         label: "Dashboard",
         icon: LayoutDashboard,
         path: "/",
+      },
+    ],
+  },
+  {
+    label: "REAL ESTATE",
+    items: [
+      {
+        id: "inventory",
+        label: "Inventory",
+        icon: Building,
+        module: "crm",
+        children: [
+          { id: "inventory-projects", label: "Projects", icon: Building2, path: "/inventory/projects" },
+        ],
+      },
+      {
+        id: "tenant-settings",
+        label: "Branding",
+        icon: Palette,
+        path: "/settings/tenant",
+        module: "crm",
       },
     ],
   },

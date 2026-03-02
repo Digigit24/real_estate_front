@@ -535,6 +535,48 @@ export const API_CONFIG = {
     },
   },
 
+  // ==================== INVENTORY (Real Estate) ====================
+  INVENTORY: {
+    // Project endpoints
+    PROJECTS: '/inventory/projects/',
+    PROJECT_DETAIL: '/inventory/projects/:id/',
+    PROJECT_CREATE: '/inventory/projects/',
+    PROJECT_UPDATE: '/inventory/projects/:id/',
+    PROJECT_DELETE: '/inventory/projects/:id/',
+    PROJECT_INVENTORY_SUMMARY: '/inventory/projects/:id/inventory-summary/',
+
+    // Tower endpoints
+    TOWERS: '/inventory/towers/',
+    TOWER_DETAIL: '/inventory/towers/:id/',
+    TOWER_CREATE: '/inventory/towers/',
+    TOWER_UPDATE: '/inventory/towers/:id/',
+    TOWER_DELETE: '/inventory/towers/:id/',
+    TOWER_UNIT_GRID: '/inventory/towers/:id/unit-grid/',
+
+    // Unit endpoints
+    UNITS: '/inventory/units/',
+    UNIT_DETAIL: '/inventory/units/:id/',
+    UNIT_CREATE: '/inventory/units/',
+    UNIT_UPDATE: '/inventory/units/:id/',
+    UNIT_DELETE: '/inventory/units/:id/',
+    UNIT_RESERVE: '/inventory/units/:id/reserve/',
+    UNIT_RELEASE: '/inventory/units/:id/release/',
+    UNIT_UPDATE_STATUS: '/inventory/units/:id/update-status/',
+    UNIT_PRICE_CALCULATOR: '/inventory/units/price-calculator/',
+    UNIT_SUGGEST: '/inventory/units/suggest/',
+  },
+
+  // ==================== TENANT SETTINGS (Real Estate) ====================
+  TENANT_SETTINGS: {
+    GET: '/tenant/settings/',
+    UPDATE: '/tenant/settings/',
+  },
+
+  // ==================== PIPELINE SEED ====================
+  PIPELINE_SEED: {
+    INITIALIZE_DEFAULTS: '/crm/statuses/initialize-defaults/',
+  },
+
   // ==================== WHATSAPP ====================
   // NOTE: These endpoints are for the legacy FastAPI backend.
   // For Laravel backend, use WHATSAPP_EXTERNAL endpoints instead.
