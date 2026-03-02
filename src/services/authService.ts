@@ -1,4 +1,5 @@
 // src/services/authService.ts
+import axios from 'axios';
 import { authClient, tokenManager } from '@/lib/client';
 import { API_CONFIG } from '@/lib/apiConfig';
 import { 
@@ -38,17 +39,22 @@ class AuthService {
     try {
       console.log('🔐 Login attempt:', { email: payload.email });
 
-      const response = await authClient.post<any>(
-        API_CONFIG.AUTH.LOGIN,
-        payload
+      // Login endpoint is at /auth/superadmin-login/ (no /api prefix),
+      // so strip /api from AUTH_BASE_URL to get the server origin
+      const serverBaseUrl = API_CONFIG.AUTH_BASE_URL.replace(/\/api\/?$/, '');
+      const response = await axios.post<any>(
+        `${serverBaseUrl}${API_CONFIG.AUTH.LOGIN}`,
+        payload,
+        { headers: { 'Content-Type': 'application/json' } }
       );
 
       console.log('✅ Login API response:', response.data);
 
-      // Handle the actual API response structure
-      const { tokens, user: userData } = response.data;
-      const access = tokens.access;
-      const refresh = tokens.refresh;
+      // Handle the superadmin-login response structure
+      const data = response.data;
+      const access = data.access_token;
+      const refresh = data.refresh_token || null;
+      const userData = data.user;
 
       console.log('🎫 Tokens received:', {
         access: access ? 'Yes ✓' : 'No ✗',
@@ -61,13 +67,13 @@ class AuthService {
 
       // Build proper user object with tenant structure
       const user: User = {
-        id: userData.id,
+        id: decoded?.user_id || userData.tenant_id || '',
         email: userData.email,
         tenant: {
-          id: userData.tenant || decoded?.tenant_id || '',
+          id: userData.tenant_id || decoded?.tenant_id || '',
           name: userData.tenant_name || '',
           slug: decoded?.tenant_slug || '',
-          enabled_modules: decoded?.enabled_modules || []
+          enabled_modules: userData.enabled_modules || decoded?.enabled_modules || []
         },
         roles: userData.roles || [],
         preferences: userData.preferences || {}
@@ -77,13 +83,15 @@ class AuthService {
 
       // Store tokens and user temporarily
       tokenManager.setAccessToken(access);
-      tokenManager.setRefreshToken(refresh);
+      if (refresh) {
+        tokenManager.setRefreshToken(refresh);
+      }
 
       // Fetch full user details including preferences if not in login response
       if (!userData.preferences) {
         try {
           console.log('🔄 Fetching user preferences...');
-          const userDetailUrl = API_CONFIG.AUTH.USERS.DETAIL.replace(':id', userData.id);
+          const userDetailUrl = API_CONFIG.AUTH.USERS.DETAIL.replace(':id', user.id);
           const userDetailResponse = await authClient.get(userDetailUrl);
           user.preferences = userDetailResponse.data?.preferences || {};
           console.log('✅ User preferences fetched:', user.preferences);

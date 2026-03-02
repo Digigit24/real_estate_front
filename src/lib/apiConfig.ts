@@ -51,7 +51,7 @@ export const API_CONFIG = {
 
   // ==================== AUTHENTICATION ====================
   AUTH: {
-    LOGIN: '/auth/login/',
+    LOGIN: '/auth/superadmin-login/',
     REFRESH: '/auth/token/refresh/',
     VERIFY: '/auth/token/verify/',
     LOGOUT: '/auth/logout/',
