@@ -244,6 +244,26 @@ export interface BulkStatusUpdateResponse {
   message: string;
 }
 
+export interface MoveToStatusPayload {
+  status_id: number;
+}
+
+export interface MoveToStatusResponse {
+  id: number;
+  status: number;
+  message?: string;
+}
+
+export interface BulkAssignPayload {
+  lead_ids: number[];
+  assigned_to: string;
+}
+
+export interface BulkAssignResponse {
+  updated_count: number;
+  message: string;
+}
+
 // Query Parameters Types
 export interface LeadsQueryParams {
   page?: number;

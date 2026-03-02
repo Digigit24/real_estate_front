@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCRM } from '@/hooks/useCRM';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useUsers } from '@/hooks/useUsers';
 import { DataTable, type DataTableColumn } from '@/components/DataTable';
 import { LeadsFormDrawer } from '@/components/LeadsFormDrawer';
 import { LeadStatusFormDrawer } from '@/components/LeadStatusFormDrawer';
@@ -21,7 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, RefreshCw, Building2, Phone, Mail, IndianRupee, LayoutGrid, List, Download, Upload, FileSpreadsheet, ChevronDown, MessageCircle, Trash2, FileText, CalendarClock, MoreVertical, Eye, EyeOff, Target } from 'lucide-react';
+import { Plus, RefreshCw, Building2, Phone, Mail, IndianRupee, LayoutGrid, List, Download, Upload, FileSpreadsheet, ChevronDown, MessageCircle, Trash2, FileText, CalendarClock, MoreVertical, Eye, EyeOff, Target, UserPlus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
@@ -36,8 +37,9 @@ type ViewMode = 'list' | 'kanban' | 'followups';
 export const CRMLeads: React.FC = () => {
   const navigate = useNavigate();
   const { user, hasModuleAccess } = useAuth();
-  const { hasCRMAccess, useLeads, useLeadStatuses, useFieldConfigurations, deleteLead, patchLead, updateLeadStatus, deleteLeadStatus, bulkCreateLeads, bulkDeleteLeads, bulkUpdateLeadStatus, exportLeads, importLeads } = useCRM();
+  const { hasCRMAccess, useLeads, useLeadStatuses, useFieldConfigurations, deleteLead, patchLead, updateLeadStatus, deleteLeadStatus, bulkCreateLeads, bulkDeleteLeads, bulkUpdateLeadStatus, bulkAssignLeads, moveLeadToStatus, exportLeads, importLeads } = useCRM();
   const { formatCurrency: formatCurrencyDynamic, getCurrencyCode, getCurrencySymbol } = useCurrency();
+  const { useUsersList } = useUsers();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -61,6 +63,7 @@ export const CRMLeads: React.FC = () => {
   const [selectedLeadIds, setSelectedLeadIds] = useState<Set<number>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [isBulkUpdatingStatus, setIsBulkUpdatingStatus] = useState(false);
+  const [isBulkAssigning, setIsBulkAssigning] = useState(false);
   const [hideDuplicates, setHideDuplicates] = useState(true);
   const [leadScoreFilter, setLeadScoreFilter] = useState<string>('all');
 
@@ -79,6 +82,8 @@ export const CRMLeads: React.FC = () => {
     ordering: 'display_order',
     page_size: 200,
   });
+
+  const { data: usersData } = useUsersList({ page_size: 100 });
 
   // Cache lead statuses when fetched
   useEffect(() => {
@@ -188,6 +193,28 @@ export const CRMLeads: React.FC = () => {
     }
   }, [selectedLeadIds, bulkUpdateLeadStatus, mutate]);
 
+  const handleBulkAssign = useCallback(async (userId: string) => {
+    if (selectedLeadIds.size === 0) {
+      toast.error('No leads selected');
+      return;
+    }
+
+    setIsBulkAssigning(true);
+
+    try {
+      const leadIdsArray = Array.from(selectedLeadIds);
+      const result = await bulkAssignLeads(leadIdsArray, userId);
+
+      toast.success(result.message || `Assigned ${result.updated_count} lead(s)`);
+      setSelectedLeadIds(new Set());
+      mutate();
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to assign leads');
+    } finally {
+      setIsBulkAssigning(false);
+    }
+  }, [selectedLeadIds, bulkAssignLeads, mutate]);
+
   const toggleLeadSelection = useCallback((leadId: number) => {
     setSelectedLeadIds((prev) => {
       const newSet = new Set(prev);
@@ -286,7 +313,7 @@ export const CRMLeads: React.FC = () => {
 
       try {
         await mutate(optimisticData, false);
-        await patchLead(leadId, { status: newStatusId });
+        await moveLeadToStatus(leadId, newStatusId);
 
         if (isWonStatus) {
           toast.success('Lead marked as won!', {
@@ -300,7 +327,7 @@ export const CRMLeads: React.FC = () => {
         throw new Error(error?.message || 'Failed to update lead status');
       }
     },
-    [patchLead, mutate, leadsData, statusesData]
+    [moveLeadToStatus, mutate, leadsData, statusesData]
   );
 
   const handleEditStatus = useCallback((status: LeadStatus) => {
@@ -1064,6 +1091,40 @@ export const CRMLeads: React.FC = () => {
                       </div>
                     </DropdownMenuItem>
                   ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={isBulkAssigning}
+                    className="h-6 text-xs px-1.5"
+                  >
+                    {isBulkAssigning ? (
+                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                    ) : (
+                      <UserPlus className="h-3 w-3 mr-1" />
+                    )}
+                    Assign
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="min-w-[180px] max-h-[300px] overflow-y-auto">
+                  {usersData?.results?.map((user) => (
+                    <DropdownMenuItem
+                      key={user.id}
+                      onClick={() => handleBulkAssign(user.id)}
+                      className="cursor-pointer"
+                    >
+                      <span>{user.first_name} {user.last_name}</span>
+                      {user.email && (
+                        <span className="ml-auto text-xs text-muted-foreground truncate max-w-[120px]">{user.email}</span>
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                  {(!usersData?.results || usersData.results.length === 0) && (
+                    <DropdownMenuItem disabled>No users available</DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button

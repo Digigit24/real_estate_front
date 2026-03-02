@@ -39,7 +39,9 @@ import {
   LeadImportResponse,
   LeadImportPayload,
   BulkDeleteResponse,
-  BulkStatusUpdateResponse
+  BulkStatusUpdateResponse,
+  MoveToStatusResponse,
+  BulkAssignResponse
 } from '@/types/crmTypes';
 import { useAuth } from './useAuth';
 
@@ -273,6 +275,48 @@ export const useCRM = () => {
       return result;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to bulk update lead status';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hasCRMAccess]);
+
+  // Move lead to a specific pipeline status
+  const moveLeadToStatus = useCallback(async (leadId: number, statusId: number): Promise<MoveToStatusResponse> => {
+    if (!hasCRMAccess) {
+      throw new Error('CRM module not enabled for this user');
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await crmService.moveLeadToStatus(leadId, statusId);
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to move lead to status';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hasCRMAccess]);
+
+  // Bulk assign leads to a user
+  const bulkAssignLeads = useCallback(async (leadIds: number[], assignedTo: string): Promise<BulkAssignResponse> => {
+    if (!hasCRMAccess) {
+      throw new Error('CRM module not enabled for this user');
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await crmService.bulkAssignLeads(leadIds, assignedTo);
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to bulk assign leads';
       setError(errorMessage);
       throw err;
     } finally {
@@ -828,6 +872,8 @@ export const useCRM = () => {
     bulkCreateLeads,
     bulkDeleteLeads,
     bulkUpdateLeadStatus,
+    bulkAssignLeads,
+    moveLeadToStatus,
     exportLeads,
     importLeads,
 

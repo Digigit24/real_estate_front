@@ -17,6 +17,8 @@ import { useMeeting } from '@/hooks/useMeeting';
 import LeadDetailsForm from '@/components/lead-drawer/LeadDetailsForm';
 import LeadActivities from '@/components/lead-drawer/LeadActivities';
 import LeadTasks from '@/components/lead-drawer/LeadTasks';
+import LeadPayments from '@/components/lead-drawer/LeadPayments';
+import LeadBookings from '@/components/lead-drawer/LeadBookings';
 import MeetingsFormDrawer from '@/components/MeetingsFormDrawer';
 import { LeadScoreSlider } from '@/components/crm/LeadScoreSlider';
 import type { Lead, LeadStatus } from '@/types/crmTypes';
@@ -414,6 +416,8 @@ export const LeadDetailsPage = () => {
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="payments" className="h-7 text-xs px-3 data-[state=active]:shadow-sm">Payments</TabsTrigger>
+          <TabsTrigger value="bookings" className="h-7 text-xs px-3 data-[state=active]:shadow-sm">Bookings</TabsTrigger>
         </TabsList>
 
         {/* Lead Details Tab */}
@@ -503,6 +507,16 @@ export const LeadDetailsPage = () => {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Payments Tab */}
+        <TabsContent value="payments" className="mt-3">
+          <LeadPayments leadId={lead.id} />
+        </TabsContent>
+
+        {/* Bookings Tab */}
+        <TabsContent value="bookings" className="mt-3">
+          <LeadBookings leadId={lead.id} />
         </TabsContent>
       </Tabs>
 

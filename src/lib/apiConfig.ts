@@ -447,6 +447,8 @@ export const API_CONFIG = {
     LEAD_IMPORT: '/crm/leads/import_leads/',
     LEAD_BULK_DELETE: '/crm/leads/bulk-delete/',
     LEAD_BULK_STATUS_UPDATE: '/crm/leads/bulk-status-update/',
+    LEAD_BULK_ASSIGN: '/crm/leads/bulk-assign/',
+    LEAD_MOVE_TO_STATUS: '/crm/leads/:id/move-to-status/',
 
     // Lead Status endpoints
     LEAD_STATUSES: '/crm/statuses/',

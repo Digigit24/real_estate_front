@@ -40,7 +40,11 @@ import {
   BulkDeletePayload,
   BulkDeleteResponse,
   BulkStatusUpdatePayload,
-  BulkStatusUpdateResponse
+  BulkStatusUpdateResponse,
+  MoveToStatusPayload,
+  MoveToStatusResponse,
+  BulkAssignPayload,
+  BulkAssignResponse
 } from '@/types/crmTypes';
 
 class CRMService {
@@ -271,6 +275,40 @@ class CRMService {
       const message = error.response?.data?.error ||
                      error.response?.data?.message ||
                      'Failed to bulk update lead status';
+      throw new Error(message);
+    }
+  }
+
+  // Move lead to a specific pipeline status
+  async moveLeadToStatus(id: number, statusId: number): Promise<MoveToStatusResponse> {
+    try {
+      const payload: MoveToStatusPayload = { status_id: statusId };
+      const response = await crmClient.post<MoveToStatusResponse>(
+        API_CONFIG.CRM.LEAD_MOVE_TO_STATUS.replace(':id', id.toString()),
+        payload
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.error ||
+                     error.response?.data?.message ||
+                     'Failed to move lead to status';
+      throw new Error(message);
+    }
+  }
+
+  // Bulk assign leads to a user
+  async bulkAssignLeads(leadIds: number[], assignedTo: string): Promise<BulkAssignResponse> {
+    try {
+      const payload: BulkAssignPayload = { lead_ids: leadIds, assigned_to: assignedTo };
+      const response = await crmClient.post<BulkAssignResponse>(
+        API_CONFIG.CRM.LEAD_BULK_ASSIGN,
+        payload
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.error ||
+                     error.response?.data?.message ||
+                     'Failed to bulk assign leads';
       throw new Error(message);
     }
   }
