@@ -58,6 +58,16 @@ import { BookingDetail } from "./pages/BookingDetail";
 import { Brokers } from "./pages/Brokers";
 import { Commissions } from "./pages/Commissions";
 
+// Broker Portal
+import { BrokerLogin } from "./pages/broker-portal/BrokerLogin";
+import { BrokerRegistration } from "./pages/broker-portal/BrokerRegistration";
+import { BrokerDashboard } from "./pages/broker-portal/BrokerDashboard";
+import { BrokerSubmitLead } from "./pages/broker-portal/BrokerSubmitLead";
+import { BrokerMyLeads } from "./pages/broker-portal/BrokerMyLeads";
+import { BrokerProfile } from "./pages/broker-portal/BrokerProfile";
+import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
+import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
+
 // Analytics
 import { Analytics } from "./pages/Analytics";
 
@@ -188,6 +198,26 @@ const App = () => {
                     isAuthenticated ? <Navigate to="/" replace /> : <Login />
                   }
                 />
+
+                {/* Broker Portal Auth Routes */}
+                <Route path="/broker-portal/login" element={<BrokerLogin />} />
+                <Route path="/broker-portal/register" element={<BrokerRegistration />} />
+
+                {/* Broker Portal Protected Routes */}
+                <Route
+                  path="/broker-portal"
+                  element={
+                    <BrokerPortalProtectedRoute>
+                      <BrokerPortalLayout />
+                    </BrokerPortalProtectedRoute>
+                  }
+                >
+                  <Route index element={<BrokerDashboard />} />
+                  <Route path="my-leads" element={<BrokerMyLeads />} />
+                  <Route path="submit-lead" element={<BrokerSubmitLead />} />
+                  <Route path="me" element={<BrokerProfile />} />
+                </Route>
+
                 <Route
                   path="/*"
                   element={

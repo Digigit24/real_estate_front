@@ -229,7 +229,7 @@ export const API_CONFIG = {
 
         // Visit-specific are convenient shortcuts
         VISIT_LIST: '/opd/visits/:visit_id/template_responses/',
-        
+
         // Operations on a specific template response
         DETAIL: '/opd/template-responses/:id/',
         UPDATE: '/opd/template-responses/:id/',
@@ -456,14 +456,14 @@ export const API_CONFIG = {
     LEAD_STATUS_CREATE: '/crm/statuses/',
     LEAD_STATUS_UPDATE: '/crm/statuses/:id/',
     LEAD_STATUS_DELETE: '/crm/statuses/:id/',
-    
+
     // Lead Activity endpoints
     LEAD_ACTIVITIES: '/crm/activities/',
     LEAD_ACTIVITY_DETAIL: '/crm/activities/:id/',
     LEAD_ACTIVITY_CREATE: '/crm/activities/',
     LEAD_ACTIVITY_UPDATE: '/crm/activities/:id/',
     LEAD_ACTIVITY_DELETE: '/crm/activities/:id/',
-    
+
     // Lead Order endpoints (Kanban positioning)
     LEAD_ORDERS: '/crm/orders/',
     LEAD_ORDER_DETAIL: '/crm/orders/:id/',
@@ -608,6 +608,17 @@ export const API_CONFIG = {
     COMMISSION_MARK_PAID: '/brokers/commissions/:id/mark-paid/',
   },
 
+  // ==================== BROKER PORTAL ====================
+  BROKER_PORTAL: {
+    REGISTER: '/brokers/portal/register/',
+    LOGIN: '/brokers/portal/login/',
+    ME: '/brokers/portal/me/',
+    DASHBOARD: '/brokers/portal/dashboard/', // Or we call /my-leads/ & /my-commissions/
+    MY_LEADS: '/brokers/portal/my-leads/',
+    MY_COMMISSIONS: '/brokers/portal/my-commissions/',
+    SUBMIT_LEAD: '/brokers/portal/submit-lead/',
+  },
+
   // ==================== ANALYTICS ====================
   ANALYTICS: {
     OVERVIEW: '/analytics/overview/',
@@ -685,7 +696,7 @@ export const API_CONFIG = {
     TEMPLATE_WEBHOOK_STATUS: '/vendor/whatsapp/templates/webhook/status',
     TEMPLATE_SYNC: '/vendor/whatsapp/templates/:id/sync',
     TEMPLATE_SYNC_ALL: '/vendor/whatsapp/templates/sync',
-    
+
     // Campaigns endpoints (align with FastAPI router without trailing slashes)
     CAMPAIGN_BROADCAST: '/campaigns/broadcast',
     CAMPAIGN_BROADCAST_TEMPLATE: '/campaigns/broadcast/template',
@@ -702,7 +713,7 @@ export const API_CONFIG = {
     FLOW_UNPUBLISH: '/flows/:flow_id/unpublish',
     FLOW_DUPLICATE: '/flows/:flow_id/duplicate',
     FLOW_VALIDATE: '/flows/:flow_id/validate',
-    
+
     FLOW_STATS: '/flows/stats',
 
     // QR Codes endpoints
@@ -845,11 +856,11 @@ export const buildUrl = (
 ): string => {
   const baseUrl =
     apiType === 'auth' ? API_CONFIG.AUTH_BASE_URL :
-    apiType === 'crm' ? API_CONFIG.CRM_BASE_URL :
-    apiType === 'hms' ? API_CONFIG.HMS_BASE_URL :
-    apiType === 'whatsapp-external' ? API_CONFIG.WHATSAPP_EXTERNAL_BASE_URL :
-    API_CONFIG.WHATSAPP_BASE_URL;
-  
+      apiType === 'crm' ? API_CONFIG.CRM_BASE_URL :
+        apiType === 'hms' ? API_CONFIG.HMS_BASE_URL :
+          apiType === 'whatsapp-external' ? API_CONFIG.WHATSAPP_EXTERNAL_BASE_URL :
+            API_CONFIG.WHATSAPP_BASE_URL;
+
   let url = `${baseUrl}${endpoint}`;
 
   // Replace URL parameters (e.g., :id, :phone, :name) with URL-encoded values
