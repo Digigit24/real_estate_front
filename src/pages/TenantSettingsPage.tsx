@@ -1,19 +1,17 @@
 // src/pages/TenantSettingsPage.tsx
-import { useState, useEffect } from 'react';
-import { useTenantSettings } from '@/hooks/useTenantSettings';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { Save, Palette, Building2, FileText, Globe, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { useTenantSettings } from '@/hooks/useTenantSettings';
 import type { UpdateTenantSettingsPayload } from '@/types/tenantSettingsTypes';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Building2, FileText, Globe, Loader2, Palette, Save } from 'lucide-react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
 const settingsSchema = z.object({
   company_name: z.string().optional(),
@@ -106,7 +104,7 @@ export function TenantSettingsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl">
+    <div className="p-6 space-y-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
