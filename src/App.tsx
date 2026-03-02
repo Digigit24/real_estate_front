@@ -43,6 +43,13 @@ import Integrations from "./pages/Integrations";
 import WorkflowEditor from "./pages/WorkflowEditor";
 import { WorkflowLogs } from "./pages/WorkflowLogs";
 
+// Real Estate Inventory
+import { Projects } from "./pages/Projects";
+import { ProjectDetail } from "./pages/ProjectDetail";
+import { TowerUnitGrid } from "./pages/TowerUnitGrid";
+import { TenantSettingsPage } from "./pages/TenantSettingsPage";
+import { useFirstLogin } from "./hooks/useFirstLogin";
+
 import { WebSocketProvider } from "./context/WebSocketProvider";
 import { RealtimeChatProvider } from "./context/RealtimeChatProvider";
 import { OAuthCallback } from "./pages/OAuthCallback";
@@ -62,6 +69,9 @@ const AppLayout = () => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // First login: auto-seed pipeline stages if empty
+  useFirstLogin();
 
   return (
     <>
@@ -88,6 +98,14 @@ const AppLayout = () => {
               <Route path="/crm/tasks" element={<ModuleProtectedRoute requiredModule="crm"><CRMTasks /></ModuleProtectedRoute>} />
               <Route path="/crm/meetings" element={<ModuleProtectedRoute requiredModule="crm"><Meetings /></ModuleProtectedRoute>} />
               <Route path="/crm/pipeline" element={<ModuleProtectedRoute requiredModule="crm"><Navigate to="/crm/leads" replace /></ModuleProtectedRoute>} />
+
+              {/* Inventory Routes (Real Estate) */}
+              <Route path="/inventory/projects" element={<ModuleProtectedRoute requiredModule="crm"><Projects /></ModuleProtectedRoute>} />
+              <Route path="/inventory/projects/:id" element={<ModuleProtectedRoute requiredModule="crm"><ProjectDetail /></ModuleProtectedRoute>} />
+              <Route path="/inventory/projects/:id/towers/:towerId" element={<ModuleProtectedRoute requiredModule="crm"><TowerUnitGrid /></ModuleProtectedRoute>} />
+
+              {/* Tenant Settings (Real Estate) */}
+              <Route path="/settings/tenant" element={<ModuleProtectedRoute requiredModule="crm"><TenantSettingsPage /></ModuleProtectedRoute>} />
 
               {/* WhatsApp Routes */}
               <Route path="/whatsapp/onboarding" element={<ModuleProtectedRoute requiredModule="whatsapp"><WhatsAppOnboarding /></ModuleProtectedRoute>} />
