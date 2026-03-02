@@ -1,5 +1,3 @@
-import { Settings, User, LogOut, ChevronDown, Sun, Moon, Bell, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,12 +6,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "next-themes";
-import { authService } from "@/services/authService";
 import { useWebSocket } from "@/context/WebSocketProvider";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useAuth } from "@/hooks/useAuth";
+import { authService } from "@/services/authService";
+import { Bell, ChevronDown, LogOut, Menu, Moon, Settings, Sun, User } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const routeTitles: Record<string, string> = {
   "/": "Dashboard",
@@ -99,17 +98,16 @@ export const UniversalHeader = ({ onMenuClick }: UniversalHeaderProps) => {
       <div className="flex items-center gap-1.5">
         {/* WebSocket Status */}
         <div className="flex items-center gap-1.5 px-2" title={`WebSocket: ${socketStatus}`}>
-          <div className={`h-1.5 w-1.5 rounded-full ${
-            socketStatus === 'open' ? 'bg-emerald-500' :
-            socketStatus === 'connecting' ? 'bg-amber-500 animate-pulse' :
-            socketStatus === 'error' ? 'bg-red-500' :
-            'bg-gray-300'
-          }`} />
+          <div className={`h-1.5 w-1.5 rounded-full ${socketStatus === 'open' ? 'bg-emerald-500' :
+              socketStatus === 'connecting' ? 'bg-amber-500 animate-pulse' :
+                socketStatus === 'error' ? 'bg-red-500' :
+                  'bg-gray-300'
+            }`} />
           <span className="text-[11px] text-muted-foreground hidden md:inline">
             {socketStatus === 'open' ? 'Live' :
-             socketStatus === 'connecting' ? 'Connecting' :
-             socketStatus === 'error' ? 'Error' :
-             'Offline'}
+              socketStatus === 'connecting' ? 'Connecting' :
+                socketStatus === 'error' ? 'Error' :
+                  'Offline'}
           </span>
         </div>
 
@@ -134,7 +132,7 @@ export const UniversalHeader = ({ onMenuClick }: UniversalHeaderProps) => {
         {/* Theme Toggle */}
         <button
           onClick={handleThemeToggle}
-          className="p-2 rounded-lg hover:bg-accent transition-colors"
+          className="relative flex items-center justify-center p-2 rounded-lg hover:bg-accent transition-colors"
         >
           <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-muted-foreground" />
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-muted-foreground" />
