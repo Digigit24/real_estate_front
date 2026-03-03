@@ -67,8 +67,8 @@ import { BrokerDashboard } from "./pages/broker-portal/BrokerDashboard";
 import { BrokerLogin } from "./pages/broker-portal/BrokerLogin";
 import { BrokerMyLeads } from "./pages/broker-portal/BrokerMyLeads";
 import { BrokerProfile } from "./pages/broker-portal/BrokerProfile";
-import { BrokerRegistration } from "./pages/broker-portal/BrokerRegistration";
-import { BrokerSubmitLead } from "./pages/broker-portal/BrokerSubmitLead";
+import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
+import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
 
 // Analytics
 import { Analytics } from "./pages/Analytics";
@@ -221,6 +221,12 @@ const App = () => {
                   <Route index element={<BrokerDashboard />} />
                   <Route path="my-leads" element={<BrokerMyLeads />} />
                   <Route path="submit-lead" element={<BrokerSubmitLead />} />
+                  <Route path="statuses" element={<BrokerStatuses />} />
+                  <Route path="activities" element={<BrokerActivities />} />
+                  <Route path="field-configs" element={<BrokerFieldConfigs />} />
+                  <Route path="inventory" element={<BrokerInventory />} />
+                  <Route path="inventory/units" element={<BrokerUnits />} />
+                  <Route path="bookings" element={<BrokerBookings />} />
                   <Route path="me" element={<BrokerProfile />} />
                 </Route>
 
