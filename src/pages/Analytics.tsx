@@ -1,11 +1,8 @@
-import { useState } from 'react';
-import { useAnalytics } from '@/hooks/useAnalytics';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building, Users, DollarSign, TrendingUp, BarChart3, Target, Trophy, Megaphone, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -14,6 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { BarChart3, Building, DollarSign, Megaphone, RefreshCw, Target, TrendingUp, Trophy, Users } from 'lucide-react';
+import { useState } from 'react';
 
 const currencyFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -25,7 +25,8 @@ function formatCurrency(value: number): string {
   return currencyFormatter.format(value);
 }
 
-function formatPercent(value: number): string {
+function formatPercent(value: number | undefined | null): string {
+  if (value === undefined || value === null || Number.isNaN(value)) return '0.0%';
   return `${value.toFixed(1)}%`;
 }
 
@@ -365,13 +366,12 @@ export function Analytics() {
                       <div className="flex items-center gap-1.5">
                         {agent.rank <= 3 ? (
                           <span
-                            className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                              agent.rank === 1
+                            className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${agent.rank === 1
                                 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
                                 : agent.rank === 2
                                   ? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                                   : 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400'
-                            }`}
+                              }`}
                           >
                             {agent.rank}
                           </span>

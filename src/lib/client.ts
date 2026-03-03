@@ -105,13 +105,9 @@ authClient.interceptors.request.use(
 
           if (tenantId) {
             config.headers['X-Tenant-Id'] = tenantId;
-            config.headers['x-tenant-id'] = tenantId; // Backend expects lowercase
-            config.headers['tenanttoken'] = tenantId; // Your API uses 'tenanttoken' header
 
             console.log('🏢 Added tenant headers to Auth:', {
               'X-Tenant-Id': tenantId,
-              'x-tenant-id': tenantId,
-              'tenanttoken': tenantId
             });
           }
 
@@ -138,19 +134,33 @@ authClient.interceptors.request.use(
 // Request interceptor for CRM client - attach token and tenant headers
 crmClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = tokenManager.getAccessToken();
+    const isAdminRoute = !config.url?.includes('/brokers/portal/');
     
-    console.log('📤 CRM API Request:', {
-      url: config.url,
-      method: config.method?.toUpperCase(),
-      hasToken: !!token
-    });
-    
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      console.log('🔑 Added Bearer token to CRM request');
+    // For broker portal routes, use the broker token from localStorage
+    if (!isAdminRoute) {
+      const brokerToken = localStorage.getItem('celiyo_broker_token');
+      if (brokerToken) {
+        config.headers.Authorization = `Bearer ${brokerToken}`;
+        console.log('🔑 Added Broker Bearer token to CRM request');
+      } else {
+        console.warn('⚠️ No access token found for Broker CRM request!');
+      }
     } else {
-      console.warn('⚠️ No access token found for CRM request!');
+      // For standard admin routes, use the standard access token
+      const token = tokenManager.getAccessToken();
+      
+      console.log('📤 CRM API Request:', {
+        url: config.url,
+        method: config.method?.toUpperCase(),
+        hasToken: !!token
+      });
+      
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        console.log('🔑 Added Bearer token to CRM request');
+      } else {
+        console.warn('⚠️ No access token found for CRM request!');
+      }
     }
 
     // Multi-tenant header propagation (read from stored user)
@@ -166,11 +176,9 @@ crmClient.interceptors.request.use(
           
           if (tenantId) {
             config.headers['X-Tenant-Id'] = tenantId;
-            config.headers['tenanttoken'] = tenantId; // Your API uses 'tenanttoken' header
             
             console.log('🏢 Added tenant headers:', {
               'X-Tenant-Id': tenantId,
-              'tenanttoken': tenantId
             });
           }
           

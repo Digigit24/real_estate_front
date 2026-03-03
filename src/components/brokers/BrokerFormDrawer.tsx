@@ -1,13 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
+import { SideDrawer, type DrawerActionButton } from '@/components/SideDrawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -17,12 +8,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import type {
   Broker,
   CreateBrokerPayload,
 } from '@/types/brokerTypes';
-import { BrokerStatusEnum, BROKER_STATUS_LABELS } from '@/types/brokerTypes';
+import { BROKER_STATUS_LABELS, BrokerStatusEnum } from '@/types/brokerTypes';
+import { useCallback, useEffect, useState } from 'react';
 
 interface BrokerFormDrawerProps {
   open: boolean;
@@ -50,6 +42,7 @@ export function BrokerFormDrawer({
   onSubmit,
   isSubmitting = false,
 }: BrokerFormDrawerProps) {
+  const { user } = useAuth();
   const isEditing = !!broker;
 
   const [formData, setFormData] = useState<CreateBrokerPayload>(defaultFormData);
@@ -125,160 +118,167 @@ export function BrokerFormDrawer({
       ...(formData.rera_number && { rera_number: formData.rera_number.trim() }),
       ...(formData.city && { city: formData.city.trim() }),
       ...(formData.status && { status: formData.status }),
+      ...(user?.id && !isEditing ? { owner_user_id: user.id } : {}),
     };
 
     await onSubmit(payload);
-  }, [formData, validate, onSubmit]);
+  }, [formData, validate, onSubmit, user?.id, isEditing]);
+
+  const drawerTitle = isEditing ? 'Edit Broker' : 'Add Broker';
+  const drawerDescription = isEditing
+    ? 'Update broker details and commission configuration.'
+    : 'Add a new channel partner or broker to your network.';
+
+  const footerButtons: DrawerActionButton[] = [
+    {
+      label: 'Cancel',
+      onClick: () => onOpenChange(false),
+      variant: 'outline',
+      disabled: isSubmitting,
+    },
+    {
+      label: isEditing ? 'Save Changes' : 'Add Broker',
+      onClick: handleSubmit,
+      variant: 'default',
+      loading: isSubmitting,
+    },
+  ];
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-lg overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{isEditing ? 'Edit Broker' : 'Add Broker'}</SheetTitle>
-          <SheetDescription>
-            {isEditing
-              ? 'Update broker details and commission configuration.'
-              : 'Add a new channel partner or broker to your network.'}
-          </SheetDescription>
-        </SheetHeader>
+    <SideDrawer
+      open={open}
+      onOpenChange={onOpenChange}
+      title={drawerTitle}
+      description={drawerDescription}
+      mode={isEditing ? 'edit' : 'create'}
+      size="md"
+      footerButtons={footerButtons}
+      footerAlignment="right"
+      resizable={true}
+      storageKey="broker-drawer-width"
+    >
+      <div className="space-y-6">
+        {/* Basic Information */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-muted-foreground">Basic Information</h4>
 
-        <div className="space-y-5 py-6">
-          {/* Basic Information */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-muted-foreground">Basic Information</h4>
-
-            <div className="space-y-2">
-              <Label htmlFor="broker-name">Name *</Label>
-              <Input
-                id="broker-name"
-                value={formData.name}
-                onChange={handleChange('name')}
-                placeholder="e.g. John Doe"
-                className={errors.name ? 'border-destructive' : ''}
-              />
-              {errors.name && (
-                <p className="text-xs text-destructive">{errors.name}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="broker-phone">Phone *</Label>
-              <Input
-                id="broker-phone"
-                value={formData.phone}
-                onChange={handleChange('phone')}
-                placeholder="e.g. +91 9876543210"
-                className={errors.phone ? 'border-destructive' : ''}
-              />
-              {errors.phone && (
-                <p className="text-xs text-destructive">{errors.phone}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="broker-email">Email</Label>
-              <Input
-                id="broker-email"
-                type="email"
-                value={formData.email || ''}
-                onChange={handleChange('email')}
-                placeholder="e.g. john@example.com"
-                className={errors.email ? 'border-destructive' : ''}
-              />
-              {errors.email && (
-                <p className="text-xs text-destructive">{errors.email}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="broker-company">Company Name</Label>
-              <Input
-                id="broker-company"
-                value={formData.company_name || ''}
-                onChange={handleChange('company_name')}
-                placeholder="e.g. ABC Realtors"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="broker-name">Name *</Label>
+            <Input
+              id="broker-name"
+              value={formData.name}
+              onChange={handleChange('name')}
+              placeholder="e.g. John Doe"
+              className={errors.name ? 'border-destructive' : ''}
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">{errors.name}</p>
+            )}
           </div>
 
-          {/* Commission & Registration */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-muted-foreground">Commission & Registration</h4>
-
-            <div className="space-y-2">
-              <Label htmlFor="broker-rera">RERA Number</Label>
-              <Input
-                id="broker-rera"
-                value={formData.rera_number || ''}
-                onChange={handleChange('rera_number')}
-                placeholder="e.g. MH/01/2025/12345"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="broker-commission">Commission Rate (%) *</Label>
-              <Input
-                id="broker-commission"
-                value={formData.commission_rate}
-                onChange={handleChange('commission_rate')}
-                placeholder="e.g. 2.5"
-                className={errors.commission_rate ? 'border-destructive' : ''}
-              />
-              {errors.commission_rate && (
-                <p className="text-xs text-destructive">{errors.commission_rate}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="broker-phone">Phone *</Label>
+            <Input
+              id="broker-phone"
+              value={formData.phone}
+              onChange={handleChange('phone')}
+              placeholder="e.g. +91 9876543210"
+              className={errors.phone ? 'border-destructive' : ''}
+            />
+            {errors.phone && (
+              <p className="text-xs text-destructive">{errors.phone}</p>
+            )}
           </div>
 
-          {/* Location & Status */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-muted-foreground">Location & Status</h4>
+          <div className="space-y-2">
+            <Label htmlFor="broker-email">Email</Label>
+            <Input
+              id="broker-email"
+              type="email"
+              value={formData.email || ''}
+              onChange={handleChange('email')}
+              placeholder="e.g. john@example.com"
+              className={errors.email ? 'border-destructive' : ''}
+            />
+            {errors.email && (
+              <p className="text-xs text-destructive">{errors.email}</p>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="broker-city">City</Label>
-              <Input
-                id="broker-city"
-                value={formData.city || ''}
-                onChange={handleChange('city')}
-                placeholder="e.g. Mumbai"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="broker-status">Status</Label>
-              <Select
-                value={formData.status || BrokerStatusEnum.PENDING}
-                onValueChange={handleStatusChange}
-              >
-                <SelectTrigger id="broker-status">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(BrokerStatusEnum).map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {BROKER_STATUS_LABELS[status]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="broker-company">Company Name</Label>
+            <Input
+              id="broker-company"
+              value={formData.company_name || ''}
+              onChange={handleChange('company_name')}
+              placeholder="e.g. ABC Realtors"
+            />
           </div>
         </div>
 
-        <SheetFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />}
-            {isEditing ? 'Save Changes' : 'Add Broker'}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        {/* Commission & Registration */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-muted-foreground">Commission & Registration</h4>
+
+          <div className="space-y-2">
+            <Label htmlFor="broker-rera">RERA Number</Label>
+            <Input
+              id="broker-rera"
+              value={formData.rera_number || ''}
+              onChange={handleChange('rera_number')}
+              placeholder="e.g. MH/01/2025/12345"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="broker-commission">Commission Rate (%) *</Label>
+            <Input
+              id="broker-commission"
+              value={formData.commission_rate}
+              onChange={handleChange('commission_rate')}
+              placeholder="e.g. 2.5"
+              className={errors.commission_rate ? 'border-destructive' : ''}
+            />
+            {errors.commission_rate && (
+              <p className="text-xs text-destructive">{errors.commission_rate}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Location & Status */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-muted-foreground">Location & Status</h4>
+
+          <div className="space-y-2">
+            <Label htmlFor="broker-city">City</Label>
+            <Input
+              id="broker-city"
+              value={formData.city || ''}
+              onChange={handleChange('city')}
+              placeholder="e.g. Mumbai"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="broker-status">Status</Label>
+            <Select
+              value={formData.status || BrokerStatusEnum.PENDING}
+              onValueChange={handleStatusChange}
+            >
+              <SelectTrigger id="broker-status">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(BrokerStatusEnum).map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {BROKER_STATUS_LABELS[status]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+    </SideDrawer>
   );
 }
