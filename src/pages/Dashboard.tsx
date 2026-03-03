@@ -1,67 +1,66 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from 'next-themes';
-import {
-  Users,
-  Loader2,
-  ArrowRight,
-  MessageCircle,
-  Target,
-  CalendarClock,
-  CheckCircle2,
-  Clock,
-  Zap,
-  ChevronLeft,
-  ChevronRight,
-  Phone,
-  Mail,
-  FileText,
-  MessageSquare,
-  CircleDot,
-  AlertTriangle,
-} from 'lucide-react';
 import { useCRM } from '@/hooks/useCRM';
 import { useMeeting } from '@/hooks/useMeeting';
+import { analyticsService } from '@/services/analyticsService';
+import { LeadStatus, PriorityEnum, TaskStatusEnum } from '@/types/crmTypes';
+import { useQuery } from '@tanstack/react-query';
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
   addDays,
   addMonths,
-  subMonths,
+  endOfMonth,
+  endOfWeek,
+  format,
+  formatDistanceToNow,
+  isPast,
   isSameMonth,
   isToday,
-  isPast,
   parseISO,
-  formatDistanceToNow,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
 } from 'date-fns';
-import type { LeadStatus } from '@/types/crmTypes';
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarClock,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  CircleDot,
+  FileText,
+  Loader2,
+  Mail,
+  MessageCircle,
+  MessageSquare,
+  Phone,
+  Target,
+  Users,
+  Zap
+} from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
-// Generate chart data from a sinusoidal pattern
-const generateChartData = () => {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return months.map((month, i) => ({
-    name: month,
-    leads: Math.floor(20 + Math.sin(i * 0.8) * 15 + i * 3),
-  }));
-};
+// Chart data will now be fetched directly from analyticsService
 
 const Dashboard = () => {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const navigate = useNavigate();
   const [calendarDate, setCalendarDate] = useState(new Date());
+
+  const { data: revenue } = useQuery({
+    queryKey: ['analytics_revenue_trend'],
+    queryFn: () => analyticsService.getRevenue({ days: 365 })
+  });
 
   const { useLeads, useLeadStatuses, useTasks, useLeadActivities } = useCRM();
   const { useUpcomingMeetings } = useMeeting();
@@ -74,14 +73,14 @@ const Dashboard = () => {
   const { data: recentLeadsData } = useLeads({ page: 1, page_size: 5, ordering: '-created_at' });
 
   // Leads by priority
-  const { data: highPriorityData } = useLeads({ page: 1, page_size: 1, priority: 'HIGH' });
-  const { data: medPriorityData } = useLeads({ page: 1, page_size: 1, priority: 'MEDIUM' });
-  const { data: lowPriorityData } = useLeads({ page: 1, page_size: 1, priority: 'LOW' });
+  const { data: highPriorityData } = useLeads({ page: 1, page_size: 1, priority: PriorityEnum.HIGH });
+  const { data: medPriorityData } = useLeads({ page: 1, page_size: 1, priority: PriorityEnum.MEDIUM });
+  const { data: lowPriorityData } = useLeads({ page: 1, page_size: 1, priority: PriorityEnum.LOW });
 
   // Tasks
   const { data: allTasksData } = useTasks({ page: 1, page_size: 5, ordering: 'due_date' });
-  const { data: openTasksData } = useTasks({ page: 1, page_size: 1, status: 'TODO' });
-  const { data: inProgressTasksData } = useTasks({ page: 1, page_size: 1, status: 'IN_PROGRESS' });
+  const { data: openTasksData } = useTasks({ page: 1, page_size: 1, status: TaskStatusEnum.TODO });
+  const { data: inProgressTasksData } = useTasks({ page: 1, page_size: 1, status: TaskStatusEnum.IN_PROGRESS });
 
   // Recent activities
   const { data: activitiesData } = useLeadActivities({ page: 1, page_size: 6, ordering: '-happened_at' });
@@ -109,7 +108,14 @@ const Dashboard = () => {
   const upcomingMeetings = upcomingMeetingsData?.results || [];
 
   const wonStatusIds = useMemo(() => statuses.filter(s => s.is_won).map(s => s.id), [statuses]);
-  const chartData = useMemo(() => generateChartData(), []);
+  const chartData = useMemo(() => {
+    if (!revenue?.monthly_trend) return [];
+    return revenue.monthly_trend.map(item => ({
+      name: item.month,
+      bookings: item.bookings,
+      value: item.value
+    }));
+  }, [revenue]);
 
   // Calendar event dates
   const eventDates = useMemo(() => {
@@ -223,11 +229,10 @@ const Dashboard = () => {
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                  isDark
-                    ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
-                }`}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${isDark
+                  ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
+                  }`}
               >
                 <item.icon className="w-3.5 h-3.5" />
                 {item.label}
@@ -283,13 +288,13 @@ const Dashboard = () => {
           {/* Area Chart */}
           <div className={`${cardClass} p-4 lg:col-span-3`}>
             <h2 className={`text-xs font-medium mb-3 ${mutedText}`}>
-              Leads Overview
+              Bookings Trend
             </h2>
             <div className="h-44">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="leadsFill" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="bookingsFill" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor={isDark ? '#6366f1' : '#818cf8'} stopOpacity={0.2} />
                       <stop offset="100%" stopColor={isDark ? '#6366f1' : '#818cf8'} stopOpacity={0} />
                     </linearGradient>
@@ -306,7 +311,7 @@ const Dashboard = () => {
                       boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                     }}
                   />
-                  <Area type="monotone" dataKey="leads" stroke={isDark ? '#6366f1' : '#818cf8'} strokeWidth={2} fill="url(#leadsFill)" />
+                  <Area type="monotone" dataKey="bookings" stroke={isDark ? '#6366f1' : '#818cf8'} strokeWidth={2} fill="url(#bookingsFill)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -338,11 +343,10 @@ const Dashboard = () => {
                 const events = eventDates[dateKey];
                 return (
                   <div key={i} className="flex flex-col items-center py-0.5">
-                    <div className={`w-7 h-7 flex items-center justify-center rounded-md text-[11px] ${
-                      !inMonth ? (isDark ? 'text-gray-700' : 'text-gray-300')
-                        : today ? (isDark ? 'bg-indigo-600 text-white font-semibold' : 'bg-gray-900 text-white font-semibold')
+                    <div className={`w-7 h-7 flex items-center justify-center rounded-md text-[11px] ${!inMonth ? (isDark ? 'text-gray-700' : 'text-gray-300')
+                      : today ? (isDark ? 'bg-indigo-600 text-white font-semibold' : 'bg-gray-900 text-white font-semibold')
                         : (isDark ? 'text-gray-300' : 'text-gray-700')
-                    }`}>
+                      }`}>
                       {format(day, 'd')}
                     </div>
                     {inMonth && events && (
@@ -376,9 +380,8 @@ const Dashboard = () => {
               {statuses.map((status) => (
                 <div
                   key={status.id}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium border ${
-                    isDark ? 'border-gray-800 bg-gray-800/50' : 'border-gray-100 bg-gray-50'
-                  }`}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium border ${isDark ? 'border-gray-800 bg-gray-800/50' : 'border-gray-100 bg-gray-50'
+                    }`}
                 >
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color_hex || '#6B7280' }} />
                   <span className={isDark ? 'text-gray-300' : 'text-gray-600'}>{status.name}</span>
@@ -417,9 +420,8 @@ const Dashboard = () => {
                       className={`flex items-center gap-2.5 py-2 cursor-pointer ${hoverBg} -mx-1 px-1 rounded`}
                       onClick={() => navigate(`/crm/leads/${lead.id}`)}
                     >
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 ${
-                        isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-600'
-                      }`}>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-600'
+                        }`}>
                         {lead.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -472,9 +474,8 @@ const Dashboard = () => {
                   const isDone = task.status === 'DONE';
                   return (
                     <div key={task.id} className={`flex items-start gap-2.5 py-2 ${isDone ? 'opacity-50' : ''}`}>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 shrink-0 ${
-                        isDone ? 'border-green-500 bg-green-500' : isOverdue ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'
-                      }`}>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 shrink-0 ${isDone ? 'border-green-500 bg-green-500' : isOverdue ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'
+                        }`}>
                         {isDone && <CheckCircle2 className="w-3 h-3 text-white" />}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -487,11 +488,10 @@ const Dashboard = () => {
                               {format(parseISO(task.due_date), 'MMM dd')}
                             </span>
                           )}
-                          <span className={`text-[9px] px-1 py-0 rounded ${
-                            task.priority === 'HIGH' ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                          <span className={`text-[9px] px-1 py-0 rounded ${task.priority === 'HIGH' ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                             : task.priority === 'LOW' ? 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
-                          }`}>
+                              : 'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            }`}>
                             {task.priority}
                           </span>
                         </div>
@@ -524,11 +524,10 @@ const Dashboard = () => {
                   const meetingToday = isToday(startDate);
                   return (
                     <div key={meeting.id} className={`flex items-start gap-2.5 py-2`}>
-                      <div className={`w-9 h-9 rounded-lg flex flex-col items-center justify-center shrink-0 ${
-                        meetingToday
-                          ? 'bg-indigo-100 dark:bg-indigo-900/40'
-                          : isDark ? 'bg-gray-800' : 'bg-gray-50'
-                      }`}>
+                      <div className={`w-9 h-9 rounded-lg flex flex-col items-center justify-center shrink-0 ${meetingToday
+                        ? 'bg-indigo-100 dark:bg-indigo-900/40'
+                        : isDark ? 'bg-gray-800' : 'bg-gray-50'
+                        }`}>
                         <span className={`text-[9px] font-medium leading-none ${meetingToday ? 'text-indigo-600 dark:text-indigo-400' : dimText}`}>
                           {format(startDate, 'MMM')}
                         </span>

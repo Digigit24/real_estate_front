@@ -1,13 +1,13 @@
 // src/services/tenantService.ts
-import { authClient } from '@/lib/client';
 import { API_CONFIG, buildQueryString } from '@/lib/apiConfig';
+import { authClient } from '@/lib/client';
 import {
-  Tenant,
-  TenantListParams,
-  PaginatedResponse,
-  TenantUpdateData,
-  TenantImage,
-  TenantImageUpload
+    PaginatedResponse,
+    Tenant,
+    TenantImage,
+    TenantImageUpload,
+    TenantListParams,
+    TenantUpdateData
 } from '@/types/tenant.types';
 
 /**
@@ -19,7 +19,7 @@ class TenantService {
   // Get tenants with optional query parameters
   async getTenants(params?: TenantListParams): Promise<PaginatedResponse<Tenant>> {
     try {
-      const queryString = buildQueryString(params);
+      const queryString = buildQueryString(params as any);
       const response = await authClient.get<PaginatedResponse<Tenant>>(
         `${API_CONFIG.AUTH.TENANTS.LIST}${queryString}`
       );
@@ -66,10 +66,17 @@ class TenantService {
   // Get current tenant (if API endpoint exists)
   async getCurrentTenant(): Promise<Tenant> {
     try {
-      // Assuming there's a /tenants/me/ endpoint or similar
-      // If not, you'll need to get the tenant ID from the user's context
+      // Import userService directly here to avoid potential circular dependencies if they exist
+      const { userService } = await import('@/services/userService');
+      const currentUser = await userService.getCurrentUser();
+      const tenantId = (currentUser?.tenant as any)?.id || currentUser?.tenant;
+      if (!tenantId) {
+        throw new Error('No tenant ID found for current user');
+      }
+
+      const idStr = typeof tenantId === 'string' ? tenantId : (tenantId as any).id;
       const response = await authClient.get<Tenant>(
-        '/tenants/me/'
+        API_CONFIG.AUTH.TENANTS.DETAIL.replace(':id', idStr)
       );
       return response.data;
     } catch (error: any) {
