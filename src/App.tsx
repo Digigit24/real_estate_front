@@ -11,7 +11,7 @@ import { swrConfig } from "@/lib/swrConfig";
 import { authService } from "@/services/authService";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { SWRConfig } from "swr";
 import Campaigns from "./pages/Campaigns";
 import Chats from "./pages/Chats";
@@ -61,20 +61,29 @@ import { Brokers } from "./pages/Brokers";
 import { Commissions } from "./pages/Commissions";
 
 // Broker Portal
+// import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
+// import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
 import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
 import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
+import { BrokerActivities } from "./pages/broker-portal/BrokerActivities";
+import { BrokerBookings } from "./pages/broker-portal/BrokerBookings";
 import { BrokerDashboard } from "./pages/broker-portal/BrokerDashboard";
+import { BrokerFieldConfigs } from "./pages/broker-portal/BrokerFieldConfigs";
+import { BrokerInventory } from "./pages/broker-portal/BrokerInventory";
 import { BrokerLogin } from "./pages/broker-portal/BrokerLogin";
 import { BrokerMyLeads } from "./pages/broker-portal/BrokerMyLeads";
 import { BrokerProfile } from "./pages/broker-portal/BrokerProfile";
-import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
-import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
+import { BrokerRegistration } from "./pages/broker-portal/BrokerRegistration";
+import { BrokerStatuses } from "./pages/broker-portal/BrokerStatuses";
+import { BrokerSubmitLead } from "./pages/broker-portal/BrokerSubmitLead";
+import { BrokerUnits } from "./pages/broker-portal/BrokerUnits";
 
 // Analytics
 import { Analytics } from "./pages/Analytics";
 
 import { RealtimeChatProvider } from "./context/RealtimeChatProvider";
 import { WebSocketProvider } from "./context/WebSocketProvider";
+import { useAuth } from "./hooks/useAuth";
 import { OAuthCallback } from "./pages/OAuthCallback";
 
 const queryClient = new QueryClient({
@@ -181,7 +190,7 @@ const AppLayout = () => {
 };
 
 const App = () => {
-  const isAuthenticated = authService.isAuthenticated();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -196,52 +205,50 @@ const App = () => {
           <Toaster />
           <Sonner />
           <WebSocketProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route
-                  path="/login"
-                  element={
-                    isAuthenticated ? <Navigate to="/" replace /> : <Login />
-                  }
-                />
+            <Routes>
+              <Route
+                path="/login"
+                element={
+                  isAuthenticated ? <Navigate to="/" replace /> : <Login />
+                }
+              />
 
-                {/* Broker Portal Auth Routes */}
-                <Route path="/broker-portal/login" element={<BrokerLogin />} />
-                <Route path="/broker-portal/register" element={<BrokerRegistration />} />
+              {/* Broker Portal Auth Routes */}
+              <Route path="/broker-portal/login" element={<BrokerLogin />} />
+              <Route path="/broker-portal/register" element={<BrokerRegistration />} />
 
-                {/* Broker Portal Protected Routes */}
-                <Route
-                  path="/broker-portal"
-                  element={
-                    <BrokerPortalProtectedRoute>
-                      <BrokerPortalLayout />
-                    </BrokerPortalProtectedRoute>
-                  }
-                >
-                  <Route index element={<BrokerDashboard />} />
-                  <Route path="my-leads" element={<BrokerMyLeads />} />
-                  <Route path="submit-lead" element={<BrokerSubmitLead />} />
-                  <Route path="statuses" element={<BrokerStatuses />} />
-                  <Route path="activities" element={<BrokerActivities />} />
-                  <Route path="field-configs" element={<BrokerFieldConfigs />} />
-                  <Route path="inventory" element={<BrokerInventory />} />
-                  <Route path="inventory/units" element={<BrokerUnits />} />
-                  <Route path="bookings" element={<BrokerBookings />} />
-                  <Route path="me" element={<BrokerProfile />} />
-                </Route>
+              {/* Broker Portal Protected Routes */}
+              <Route
+                path="/broker-portal"
+                element={
+                  <BrokerPortalProtectedRoute>
+                    <BrokerPortalLayout />
+                  </BrokerPortalProtectedRoute>
+                }
+              >
+                <Route index element={<BrokerDashboard />} />
+                <Route path="my-leads" element={<BrokerMyLeads />} />
+                <Route path="submit-lead" element={<BrokerSubmitLead />} />
+                <Route path="statuses" element={<BrokerStatuses />} />
+                <Route path="activities" element={<BrokerActivities />} />
+                <Route path="field-configs" element={<BrokerFieldConfigs />} />
+                <Route path="inventory" element={<BrokerInventory />} />
+                <Route path="inventory/units" element={<BrokerUnits />} />
+                <Route path="bookings" element={<BrokerBookings />} />
+                <Route path="me" element={<BrokerProfile />} />
+              </Route>
 
-                <Route
-                  path="/*"
-                  element={
-                    <ProtectedRoute>
-                      <RealtimeChatProvider>
-                        <AppLayout />
-                      </RealtimeChatProvider>
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </BrowserRouter>
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <RealtimeChatProvider>
+                      <AppLayout />
+                    </RealtimeChatProvider>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
           </WebSocketProvider>
         </TooltipProvider>
       </QueryClientProvider>
