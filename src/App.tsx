@@ -1,78 +1,80 @@
 // src/App.tsx - CRM + WhatsApp Application
-import { useState, useEffect } from "react";
-import { SWRConfig } from "swr";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { UniversalSidebar } from "@/components/UniversalSidebar";
-import { UniversalHeader } from "@/components/UniversalHeader";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ModuleProtectedRoute } from "@/components/ModuleProtectedRoute";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { UniversalHeader } from "@/components/UniversalHeader";
+import { UniversalSidebar } from "@/components/UniversalSidebar";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { swrConfig } from "@/lib/swrConfig";
 import { authService } from "@/services/authService";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
-import { CRMLeads } from "./pages/CRMLeads";
-import { CRMActivities } from "./pages/CRMActivities";
-import { CRMLeadStatuses } from "./pages/CRMLeadStatuses";
-import { CRMFieldConfigurations } from "./pages/CRMFieldConfigurations";
-import { CRMTasks } from "./pages/CRMTasks";
-import { Meetings } from "./pages/Meetings";
-import { LeadDetailsPage } from "./pages/LeadDetailsPage";
-import Contacts from "./pages/Contacts";
-import Chats from "./pages/Chats";
-import Groups from "./pages/Groups";
-import Templates from "./pages/Templates";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { SWRConfig } from "swr";
 import Campaigns from "./pages/Campaigns";
-import Flows from "./pages/Flows";
+import Chats from "./pages/Chats";
+import Contacts from "./pages/Contacts";
+import { CRMActivities } from "./pages/CRMActivities";
+import { CRMFieldConfigurations } from "./pages/CRMFieldConfigurations";
+import { CRMLeads } from "./pages/CRMLeads";
+import { CRMLeadStatuses } from "./pages/CRMLeadStatuses";
+import { CRMTasks } from "./pages/CRMTasks";
+import Dashboard from "./pages/Dashboard";
 import FlowEditor from "./pages/FlowEditor";
+import Flows from "./pages/Flows";
+import Groups from "./pages/Groups";
+import { LeadDetailsPage } from "./pages/LeadDetailsPage";
+import Login from "./pages/Login";
+import { Meetings } from "./pages/Meetings";
+import NotFound from "./pages/NotFound";
 import QRCodes from "./pages/QRCodes";
-import WhatsAppOnboarding from "./pages/WhatsAppOnboarding";
 import Scheduling from "./pages/Scheduling";
+import Templates from "./pages/Templates";
+import WhatsAppOnboarding from "./pages/WhatsAppOnboarding";
 
 import { ThemeSync } from "@/components/ThemeSync";
-import { Users } from "./pages/Users";
-import { Roles } from "./pages/Roles";
-import { Debug } from "./pages/Debug";
 import { AdminSettings } from "./pages/AdminSettings";
+import { Debug } from "./pages/Debug";
 import Integrations from "./pages/Integrations";
+import { Roles } from "./pages/Roles";
+import { Users } from "./pages/Users";
 import WorkflowEditor from "./pages/WorkflowEditor";
 import { WorkflowLogs } from "./pages/WorkflowLogs";
 
 // Real Estate Inventory
-import { Projects } from "./pages/Projects";
-import { ProjectDetail } from "./pages/ProjectDetail";
-import { TowerUnitGrid } from "./pages/TowerUnitGrid";
-import { TenantSettingsPage } from "./pages/TenantSettingsPage";
 import { useFirstLogin } from "./hooks/useFirstLogin";
+import { ProjectDetail } from "./pages/ProjectDetail";
+import { Projects } from "./pages/Projects";
+import { TenantSettingsPage } from "./pages/TenantSettingsPage";
+import { TowerUnitGrid } from "./pages/TowerUnitGrid";
 
 // Bookings & Payments
-import { Bookings } from "./pages/Bookings";
 import { BookingDetail } from "./pages/BookingDetail";
+import { Bookings } from "./pages/Bookings";
+import { PaymentsPage } from "./pages/Payments";
 
 // Brokers
+import { BrokerDetail } from "./pages/BrokerDetail";
 import { Brokers } from "./pages/Brokers";
 import { Commissions } from "./pages/Commissions";
 
 // Broker Portal
-import { BrokerLogin } from "./pages/broker-portal/BrokerLogin";
-import { BrokerRegistration } from "./pages/broker-portal/BrokerRegistration";
-import { BrokerDashboard } from "./pages/broker-portal/BrokerDashboard";
-import { BrokerSubmitLead } from "./pages/broker-portal/BrokerSubmitLead";
-import { BrokerMyLeads } from "./pages/broker-portal/BrokerMyLeads";
-import { BrokerProfile } from "./pages/broker-portal/BrokerProfile";
 import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
 import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
+import { BrokerDashboard } from "./pages/broker-portal/BrokerDashboard";
+import { BrokerLogin } from "./pages/broker-portal/BrokerLogin";
+import { BrokerMyLeads } from "./pages/broker-portal/BrokerMyLeads";
+import { BrokerProfile } from "./pages/broker-portal/BrokerProfile";
+import { BrokerRegistration } from "./pages/broker-portal/BrokerRegistration";
+import { BrokerSubmitLead } from "./pages/broker-portal/BrokerSubmitLead";
 
 // Analytics
 import { Analytics } from "./pages/Analytics";
 
-import { WebSocketProvider } from "./context/WebSocketProvider";
 import { RealtimeChatProvider } from "./context/RealtimeChatProvider";
+import { WebSocketProvider } from "./context/WebSocketProvider";
 import { OAuthCallback } from "./pages/OAuthCallback";
 
 const queryClient = new QueryClient({
@@ -131,7 +133,11 @@ const AppLayout = () => {
 
               {/* Brokers Routes */}
               <Route path="/brokers" element={<ModuleProtectedRoute requiredModule="crm"><Brokers /></ModuleProtectedRoute>} />
+              <Route path="/brokers/:id" element={<ModuleProtectedRoute requiredModule="crm"><BrokerDetail /></ModuleProtectedRoute>} />
               <Route path="/brokers/commissions" element={<ModuleProtectedRoute requiredModule="crm"><Commissions /></ModuleProtectedRoute>} />
+
+              {/* Payments Route */}
+              <Route path="/payments" element={<ModuleProtectedRoute requiredModule="crm"><PaymentsPage /></ModuleProtectedRoute>} />
 
               {/* Analytics Route */}
               <Route path="/analytics" element={<ModuleProtectedRoute requiredModule="crm"><Analytics /></ModuleProtectedRoute>} />

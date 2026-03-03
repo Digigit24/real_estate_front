@@ -1,10 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useBrokers } from '@/hooks/useBrokers';
 import { BrokerFormDrawer } from '@/components/brokers/BrokerFormDrawer';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { DataTable, DataTableColumn } from '@/components/DataTable';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +10,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -22,19 +20,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Search, RefreshCw, Users } from 'lucide-react';
-import { toast } from 'sonner';
-import type { Broker, CreateBrokerPayload, BrokersQueryParams } from '@/types/brokerTypes';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBrokers } from '@/hooks/useBrokers';
+import { useCurrency } from '@/hooks/useCurrency';
+import type { Broker, BrokerLeaderboardEntry, BrokersQueryParams, CreateBrokerPayload } from '@/types/brokerTypes';
 import {
-  BrokerStatusEnum,
   BROKER_STATUS_COLORS,
   BROKER_STATUS_LABELS,
+  BrokerStatusEnum,
 } from '@/types/brokerTypes';
-import { DataTable, DataTableColumn } from '@/components/DataTable';
+import { Plus, RefreshCw, Search, Trophy, Users } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export function Brokers() {
+  const navigate = useNavigate();
+  const { formatCurrency } = useCurrency();
   const {
     useBrokersList,
+    useLeaderboard,
     createBroker,
     updateBroker,
     deleteBroker,
@@ -96,9 +102,8 @@ export function Brokers() {
   }, []);
 
   const handleView = useCallback((broker: Broker) => {
-    setSelectedBroker(broker);
-    setDrawerOpen(true);
-  }, []);
+    navigate(`/brokers/${broker.id}`);
+  }, [navigate]);
 
   const handleDeleteConfirm = useCallback((broker: Broker) => {
     setBrokerToDelete(broker);
@@ -280,108 +285,128 @@ export function Brokers() {
         </Button>
       </div>
 
-      {/* Toolbar: Search + Status Filter + Refresh */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search brokers..."
-            value={searchQuery}
-            onChange={handleSearch}
-            className="pl-9 h-9"
-          />
-        </div>
+      <Tabs defaultValue="list" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="list" className="gap-1.5">
+            <Users className="h-3.5 w-3.5" />
+            Brokers List
+          </TabsTrigger>
+          <TabsTrigger value="leaderboard" className="gap-1.5">
+            <Trophy className="h-3.5 w-3.5" />
+            Leaderboard
+          </TabsTrigger>
+        </TabsList>
 
-        <Select value={statusFilter} onValueChange={handleStatusFilter}>
-          <SelectTrigger className="w-[150px] h-9">
-            <SelectValue placeholder="All Statuses" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            {Object.values(BrokerStatusEnum).map((status) => (
-              <SelectItem key={status} value={status}>
-                {BROKER_STATUS_LABELS[status]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <TabsContent value="list" className="space-y-4">
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-9 w-9"
-          onClick={() => refreshBrokers()}
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
-      </div>
+          {/* Toolbar: Search + Status Filter + Refresh */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search brokers..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="pl-9 h-9"
+              />
+            </div>
 
-      {/* Content */}
-      {isLoading && brokers.length === 0 ? (
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full rounded-lg" />
-          ))}
-        </div>
-      ) : brokersError ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-sm text-destructive">{brokersError.message}</p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-4"
-            onClick={() => refreshBrokers()}
-          >
-            <RefreshCw className="h-4 w-4 mr-1.5" />
-            Retry
-          </Button>
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <DataTable
-            rows={brokers}
-            isLoading={isLoading}
-            columns={columns}
-            renderMobileCard={renderMobileCard}
-            getRowId={(broker) => broker.id}
-            getRowLabel={(broker) => broker.name}
-            onView={handleView}
-            onEdit={handleEdit}
-            onDelete={handleDeleteFromTable}
-            emptyTitle="No brokers found"
-            emptySubtitle="Try adjusting your search or filters, or add a new broker"
-          />
+            <Select value={statusFilter} onValueChange={handleStatusFilter}>
+              <SelectTrigger className="w-[150px] h-9">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                {Object.values(BrokerStatusEnum).map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {BROKER_STATUS_LABELS[status]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          {/* Pagination */}
-          {!isLoading && brokers.length > 0 && (
-            <div className="flex items-center justify-between px-4 py-2 border-t bg-muted/30">
-              <p className="text-xs text-muted-foreground">
-                Showing {brokers.length} of {totalCount} broker(s)
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 text-xs"
-                  disabled={!hasPrevious}
-                  onClick={() => setCurrentPage((p) => p - 1)}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 text-xs"
-                  disabled={!hasNext}
-                  onClick={() => setCurrentPage((p) => p + 1)}
-                >
-                  Next
-                </Button>
-              </div>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => refreshBrokers()}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Content */}
+          {isLoading && brokers.length === 0 ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : brokersError ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-sm text-destructive">{brokersError.message}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => refreshBrokers()}
+              >
+                <RefreshCw className="h-4 w-4 mr-1.5" />
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <div className="border rounded-lg overflow-hidden">
+              <DataTable
+                rows={brokers}
+                isLoading={isLoading}
+                columns={columns}
+                renderMobileCard={renderMobileCard}
+                getRowId={(broker) => broker.id}
+                getRowLabel={(broker) => broker.name}
+                onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleDeleteFromTable}
+                emptyTitle="No brokers found"
+                emptySubtitle="Try adjusting your search or filters, or add a new broker"
+              />
+
+              {/* Pagination */}
+              {!isLoading && brokers.length > 0 && (
+                <div className="flex items-center justify-between px-4 py-2 border-t bg-muted/30">
+                  <p className="text-xs text-muted-foreground">
+                    Showing {brokers.length} of {totalCount} broker(s)
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs"
+                      disabled={!hasPrevious}
+                      onClick={() => setCurrentPage((p) => p - 1)}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs"
+                      disabled={!hasNext}
+                      onClick={() => setCurrentPage((p) => p + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
+        </TabsContent>
+
+        <TabsContent value="leaderboard">
+          <LeaderboardTab />
+        </TabsContent>
+      </Tabs>
 
       {/* Form Drawer */}
       <BrokerFormDrawer
@@ -413,6 +438,108 @@ export function Brokers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+// Leaderboard sub-component
+function LeaderboardTab() {
+  const { useLeaderboard } = useBrokers();
+  const { formatCurrency } = useCurrency();
+  const { data: leaderboard, isLoading } = useLeaderboard();
+
+  const getRankDisplay = (rank: number) => {
+    switch (rank) {
+      case 1: return '🥇';
+      case 2: return '🥈';
+      case 3: return '🥉';
+      default: return `#${rank}`;
+    }
+  };
+
+  const entries = leaderboard?.results || [];
+
+  const columns: DataTableColumn<BrokerLeaderboardEntry>[] = [
+    {
+      header: 'Rank',
+      key: 'rank',
+      cell: (entry) => (
+        <span className="text-lg font-bold">{getRankDisplay(entry.rank)}</span>
+      ),
+    },
+    {
+      header: 'Broker Name',
+      key: 'name',
+      cell: (entry) => (
+        <span className="font-medium">{entry.name}</span>
+      ),
+    },
+    {
+      header: 'Leads',
+      key: 'leads_count',
+      cell: (entry) => (
+        <span className="text-sm">{entry.leads_count}</span>
+      ),
+    },
+    {
+      header: 'Bookings',
+      key: 'bookings_count',
+      cell: (entry) => (
+        <span className="text-sm font-medium">{entry.bookings_count}</span>
+      ),
+    },
+    {
+      header: 'Total Commission',
+      key: 'total_commission',
+      cell: (entry) => (
+        <span className="text-sm font-semibold text-green-600">
+          {formatCurrency(entry.total_commission || '0')}
+        </span>
+      ),
+    },
+  ];
+
+  const renderMobileCard = (entry: BrokerLeaderboardEntry) => (
+    <>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{getRankDisplay(entry.rank)}</span>
+          <div>
+            <h3 className="font-semibold text-sm">{entry.name}</h3>
+            <p className="text-xs text-muted-foreground">
+              {entry.leads_count} leads · {entry.bookings_count} bookings
+            </p>
+          </div>
+        </div>
+        <span className="text-sm font-semibold text-green-600">
+          {formatCurrency(entry.total_commission || '0')}
+        </span>
+      </div>
+    </>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <DataTable
+        rows={entries}
+        isLoading={isLoading}
+        columns={columns}
+        renderMobileCard={renderMobileCard}
+        getRowId={(entry) => entry.broker_id}
+        getRowLabel={(entry) => entry.name}
+        emptyTitle="No leaderboard data"
+        emptySubtitle="Leaderboard will appear once brokers submit leads and earn commissions"
+      />
     </div>
   );
 }

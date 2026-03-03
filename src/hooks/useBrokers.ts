@@ -1,19 +1,19 @@
 // src/hooks/useBrokers.ts
-import { useState, useCallback } from 'react';
-import useSWR from 'swr';
 import { brokerService } from '@/services/brokerService';
 import {
-  Broker,
-  BrokersResponse,
-  Commission,
-  CommissionsResponse,
-  BrokerLeaderboardResponse,
-  BrokersQueryParams,
-  CommissionsQueryParams,
-  CreateBrokerPayload,
-  UpdateBrokerPayload,
-  UpdateCommissionPayload,
+    Broker,
+    BrokerLeaderboardResponse,
+    BrokersQueryParams,
+    BrokersResponse,
+    Commission,
+    CommissionsQueryParams,
+    CommissionsResponse,
+    CreateBrokerPayload,
+    UpdateBrokerPayload,
+    UpdateCommissionPayload,
 } from '@/types/brokerTypes';
+import { useCallback, useState } from 'react';
+import useSWR from 'swr';
 
 export const useBrokers = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -62,6 +62,28 @@ export const useBrokers = () => {
       {
         revalidateOnFocus: false,
         keepPreviousData: true,
+        onError: (err) => setError(err.message),
+      }
+    );
+  };
+
+  const useBrokerLeads = (brokerId: number | null) => {
+    return useSWR<any[]>(
+      brokerId ? ['broker-leads', brokerId] : null,
+      () => brokerService.getBrokerLeads(brokerId!),
+      {
+        revalidateOnFocus: false,
+        onError: (err) => setError(err.message),
+      }
+    );
+  };
+
+  const useBrokerCommissions = (brokerId: number | null) => {
+    return useSWR<Commission[]>(
+      brokerId ? ['broker-commissions', brokerId] : null,
+      () => brokerService.getBrokerCommissions(brokerId!),
+      {
+        revalidateOnFocus: false,
         onError: (err) => setError(err.message),
       }
     );
@@ -146,6 +168,8 @@ export const useBrokers = () => {
     useBroker,
     useLeaderboard,
     useCommissionsList,
+    useBrokerLeads,
+    useBrokerCommissions,
     // Mutations
     createBroker,
     updateBroker,

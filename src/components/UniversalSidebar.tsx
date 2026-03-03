@@ -1,50 +1,49 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  Stethoscope,
-  ChevronDown,
-  Users,
-  Calendar,
-  ClipboardList,
-  X,
-  Building2,
-  Building,
-  Activity,
-  BarChart3,
-  Receipt,
-  Handshake,
-  IndianRupee,
-  MessageCircle,
-  FileText,
-  Send,
-  CheckSquare,
-  Settings2,
-  UserCog,
-  ShieldCheck,
-  Bug,
-  Workflow,
-  QrCode,
-  UserPlus,
-  Shield,
-  Plug,
-  Zap,
-  Loader2,
-  PanelLeftClose,
-  PanelLeft,
-  Home,
-  Palette,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenant } from "@/hooks/useTenant";
+import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Bug,
+  Building,
+  Building2,
+  Calendar,
+  CheckSquare,
+  ChevronDown,
+  ClipboardList,
+  FileText,
+  Handshake,
+  IndianRupee,
+  LayoutDashboard,
+  Loader2,
+  MessageCircle,
+  Palette,
+  PanelLeft,
+  PanelLeftClose,
+  Plug,
+  QrCode,
+  Receipt,
+  Send,
+  Settings2,
+  Shield,
+  ShieldCheck,
+  Stethoscope,
+  UserCog,
+  UserPlus,
+  Users,
+  Workflow,
+  X,
+  Zap
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 interface MenuItem {
   id: string;
@@ -92,6 +91,13 @@ const menuSections: MenuSection[] = [
         children: [
           { id: "bookings-list", label: "All Bookings", icon: Receipt, path: "/bookings" },
         ],
+      },
+      {
+        id: "payments",
+        label: "Payments",
+        icon: IndianRupee,
+        path: "/payments",
+        module: "crm",
       },
       {
         id: "brokers",
@@ -300,7 +306,7 @@ export function UniversalSidebar({
                         "flex items-center gap-3 h-8 px-3 rounded-lg text-[13px] transition-all duration-150",
                         "text-muted-foreground hover:text-foreground hover:bg-muted/80",
                         isActive(child.path) &&
-                          "text-foreground sidebar-active font-medium -ml-[13px] pl-[23px]"
+                        "text-foreground sidebar-active font-medium -ml-[13px] pl-[23px]"
                       )}
                     >
                       <child.icon className={cn(
@@ -329,7 +335,7 @@ export function UniversalSidebar({
             "flex items-center gap-3 h-9 px-3 rounded-lg text-[13px] font-medium transition-all duration-150",
             "text-muted-foreground hover:text-foreground hover:bg-muted/80",
             isActive(item.path) &&
-              "text-foreground sidebar-active -ml-0.5 pl-[10px]",
+            "text-foreground sidebar-active -ml-0.5 pl-[10px]",
             collapsed && "justify-center px-2"
           )}
         >
