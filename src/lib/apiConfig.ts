@@ -448,6 +448,19 @@ export const API_CONFIG = {
     LEAD_KANBAN: '/crm/leads/kanban/',
     LEAD_EXPORT: '/crm/leads/export/',
     LEAD_IMPORT: '/crm/leads/import_leads/',
+
+    // Statuses
+    STATUSES: '/crm/statuses/',
+    STATUS_DETAIL: '/crm/statuses/:id/',
+    STATUS_INIT: '/crm/statuses/initialize-defaults/',
+
+    // Activities
+    ACTIVITIES: '/crm/activities/',
+    ACTIVITY_DETAIL: '/crm/activities/:id/',
+
+    // Field Configurations
+    FIELD_CONFIGS: '/crm/field-configurations/',
+    FIELD_CONFIG_DETAIL: '/crm/field-configurations/:id/',
     LEAD_BULK_DELETE: '/crm/leads/bulk-delete/',
     LEAD_BULK_STATUS_UPDATE: '/crm/leads/bulk-status-update/',
     LEAD_BULK_ASSIGN: '/crm/leads/bulk-assign/',
@@ -611,15 +624,64 @@ export const API_CONFIG = {
     COMMISSION_MARK_PAID: '/brokers/commissions/:id/mark-paid/',
   },
 
-  // ==================== BROKER PORTAL ====================
   BROKER_PORTAL: {
     REGISTER: '/brokers/portal/register/',
     LOGIN: '/brokers/portal/login/',
+    LOGOUT: '/brokers/portal/logout/',
     ME: '/brokers/portal/me/',
     DASHBOARD: '/brokers/portal/dashboard/', // Or we call /my-leads/ & /my-commissions/
     MY_LEADS: '/brokers/portal/my-leads/',
     MY_COMMISSIONS: '/brokers/portal/my-commissions/',
     SUBMIT_LEAD: '/brokers/portal/submit-lead/',
+    // If the broker has direct access to /crm/leads/
+    LEADS: '/crm/leads/',
+    LEAD_DETAIL: '/crm/leads/:id/',
+    LEAD_ACTIVITY: '/crm/leads/:id/add-activity/',
+    LEAD_MOVE_STATUS: '/crm/leads/:id/move-to-status/',
+    LEAD_BULK_DELETE: '/crm/leads/bulk-delete/',
+    LEAD_BULK_STATUS: '/crm/leads/bulk-update-status/',
+    LEAD_BULK_ASSIGN: '/crm/leads/bulk-assign/',
+    LEAD_IMPORT_TEMPLATE: '/crm/leads/import-template/',
+    LEAD_IMPORT_BULK: '/crm/leads/import-bulk/',
+    LEAD_EXPORT: '/crm/leads/export/',
+
+    // Statuses
+    STATUSES: '/crm/statuses/',
+    STATUS_DETAIL: '/crm/statuses/:id/',
+    STATUS_INIT: '/crm/statuses/initialize-defaults/',
+
+    // Activities
+    ACTIVITIES: '/crm/activities/',
+    ACTIVITY_DETAIL: '/crm/activities/:id/',
+
+    // Field Configurations
+    FIELD_CONFIGS: '/crm/field-configurations/',
+    FIELD_CONFIG_DETAIL: '/crm/field-configurations/:id/',
+
+    // Inventory
+    PROJECTS: '/inventory/projects/',
+    PROJECT_DETAIL: '/inventory/projects/:id/',
+    PROJECT_INVENTORY_SUMMARY: '/inventory/projects/:id/inventory-summary/',
+    TOWERS: '/inventory/towers/',
+    TOWER_DETAIL: '/inventory/towers/:id/',
+    TOWER_UNIT_GRID: '/inventory/towers/:id/unit-grid/',
+    UNITS: '/inventory/units/',
+    UNIT_DETAIL: '/inventory/units/:id/',
+    UNIT_RESERVE: '/inventory/units/:id/reserve/',
+    UNIT_RELEASE: '/inventory/units/:id/release/',
+    UNIT_UPDATE_STATUS: '/inventory/units/:id/update-status/',
+    UNIT_PRICE_CALCULATOR: '/inventory/units/price-calculator/',
+    UNIT_SUGGEST: '/inventory/units/suggest/',
+
+    // Bookings
+    BOOKINGS: '/bookings/',
+    BOOKING_DETAIL: '/bookings/:id/',
+    BOOKING_MILESTONES: '/bookings/:id/milestones/',
+    BOOKING_MILESTONE_MARK_PAID: '/bookings/:id/milestones/:mid/mark-paid/',
+    BOOKING_DEMAND_LETTER: '/bookings/:id/demand-letter-data/',
+    BOOKING_RECEIPT: '/bookings/:id/milestones/:mid/receipt-data/',
+    BOOKING_SUMMARY: '/bookings/summary/',
+    BOOKING_UPCOMING_PAYMENTS: '/bookings/upcoming-payments/',
   },
 
   // ==================== ANALYTICS ====================

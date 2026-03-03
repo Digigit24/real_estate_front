@@ -65,6 +65,12 @@ import { BrokerDashboard } from "./pages/broker-portal/BrokerDashboard";
 import { BrokerSubmitLead } from "./pages/broker-portal/BrokerSubmitLead";
 import { BrokerMyLeads } from "./pages/broker-portal/BrokerMyLeads";
 import { BrokerProfile } from "./pages/broker-portal/BrokerProfile";
+import { BrokerStatuses } from "./pages/broker-portal/BrokerStatuses";
+import { BrokerActivities } from "./pages/broker-portal/BrokerActivities";
+import { BrokerFieldConfigs } from "./pages/broker-portal/BrokerFieldConfigs";
+import { BrokerInventory } from "./pages/broker-portal/BrokerInventory";
+import { BrokerUnits } from "./pages/broker-portal/BrokerUnits";
+import { BrokerBookings } from "./pages/broker-portal/BrokerBookings";
 import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
 import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
 
@@ -215,6 +221,12 @@ const App = () => {
                   <Route index element={<BrokerDashboard />} />
                   <Route path="my-leads" element={<BrokerMyLeads />} />
                   <Route path="submit-lead" element={<BrokerSubmitLead />} />
+                  <Route path="statuses" element={<BrokerStatuses />} />
+                  <Route path="activities" element={<BrokerActivities />} />
+                  <Route path="field-configs" element={<BrokerFieldConfigs />} />
+                  <Route path="inventory" element={<BrokerInventory />} />
+                  <Route path="inventory/units" element={<BrokerUnits />} />
+                  <Route path="bookings" element={<BrokerBookings />} />
                   <Route path="me" element={<BrokerProfile />} />
                 </Route>
 
