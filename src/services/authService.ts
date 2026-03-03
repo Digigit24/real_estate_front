@@ -1,18 +1,14 @@
 // src/services/authService.ts
-import axios from 'axios';
-import { authClient, tokenManager } from '@/lib/client';
 import { API_CONFIG } from '@/lib/apiConfig';
-import { 
-  LoginPayload, 
-  LoginResponse, 
-  RefreshTokenPayload,
-  RefreshTokenResponse,
-  TokenVerifyPayload,
-  TokenVerifyResponse,
-  LogoutPayload,
-  LogoutResponse,
-  User 
+import { authClient, tokenManager } from '@/lib/client';
+import {
+    LoginPayload,
+    LogoutResponse,
+    RefreshTokenResponse,
+    TokenVerifyResponse,
+    User
 } from '@/types/authTypes';
+import axios from 'axios';
 
 const USER_KEY = 'celiyo_user';
 
@@ -358,16 +354,8 @@ class AuthService {
   // Check if user has access to specific module
   hasModuleAccess(module: string): boolean {
     const user = this.getUser();
-
-    // If user object already has structured tenant with enabled_modules, use it
-    const tenant: any = (user as any)?.tenant;
-    if (tenant && typeof tenant === 'object' && Array.isArray(tenant.enabled_modules)) {
-      const hasAccess = tenant.enabled_modules.includes(module);
-      console.log(`🔑 Module access check for "${module}":`, hasAccess ? 'Granted ✓' : 'Denied ✗');
-      return hasAccess;
-    }
-
-    // Fallback to claims from access token (supports backend that places modules in JWT)
+    
+    // First check if user is super admin from token
     const access = tokenManager.getAccessToken();
     const decoded: any = access ? parseJwt(access) : null;
 
@@ -375,6 +363,14 @@ class AuthService {
     if (decoded?.is_super_admin) {
       console.log(`🔑 Module access for "${module}": Granted (Super Admin) ✓`);
       return true;
+    }
+
+    // If user object already has structured tenant with enabled_modules, use it
+    const tenant: any = (user as any)?.tenant;
+    if (tenant && typeof tenant === 'object' && Array.isArray(tenant.enabled_modules)) {
+      const hasAccess = tenant.enabled_modules.includes(module);
+      console.log(`🔑 Module access check for "${module}":`, hasAccess ? 'Granted ✓' : 'Denied ✗');
+      return hasAccess;
     }
 
     const enabledFromToken: string[] | undefined = decoded?.enabled_modules;
