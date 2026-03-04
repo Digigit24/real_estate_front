@@ -152,7 +152,6 @@ export const ActivityFormDrawer: React.FC<ActivityFormDrawerProps> = ({
         type,
         content: content.trim(),
         happened_at: happenedAtDate.toISOString(),
-        by_user_id: user?.id,
         meta,
       };
 

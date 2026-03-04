@@ -11,27 +11,27 @@ export const tokenManager = {
   getAccessToken: (): string | null => {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   },
-  
+
   setAccessToken: (token: string): void => {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
     console.log('💾 Access token saved to localStorage');
   },
-  
+
   getRefreshToken: (): string | null => {
     return localStorage.getItem(REFRESH_TOKEN_KEY);
   },
-  
+
   setRefreshToken: (token: string): void => {
     localStorage.setItem(REFRESH_TOKEN_KEY, token);
     console.log('💾 Refresh token saved to localStorage');
   },
-  
+
   removeTokens: (): void => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     console.log('🗑️ Tokens removed from localStorage');
   },
-  
+
   hasAccessToken: (): boolean => {
     return !!localStorage.getItem(ACCESS_TOKEN_KEY);
   },
@@ -40,15 +40,15 @@ export const tokenManager = {
   getToken: (): string | null => {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   },
-  
+
   setToken: (token: string): void => {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
   },
-  
+
   removeToken: (): void => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
   },
-  
+
   hasToken: (): boolean => {
     return !!localStorage.getItem(ACCESS_TOKEN_KEY);
   }
@@ -135,7 +135,7 @@ authClient.interceptors.request.use(
 crmClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const isAdminRoute = !config.url?.includes('/brokers/portal/');
-    
+
     // For broker portal routes, use the broker token from localStorage
     if (!isAdminRoute) {
       const brokerToken = localStorage.getItem('celiyo_broker_token');
@@ -148,13 +148,13 @@ crmClient.interceptors.request.use(
     } else {
       // For standard admin routes, use the standard access token
       const token = tokenManager.getAccessToken();
-      
+
       console.log('📤 CRM API Request:', {
         url: config.url,
         method: config.method?.toUpperCase(),
         hasToken: !!token
       });
-      
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
         console.log('🔑 Added Bearer token to CRM request');
@@ -169,19 +169,19 @@ crmClient.interceptors.request.use(
       if (userJson) {
         const user = JSON.parse(userJson);
         const tenant = user?.tenant;
-        
+
         if (tenant) {
           // Get tenant ID (could be tenant.id or tenant.tenant_id)
           const tenantId = tenant.id || tenant.tenant_id;
-          
+
           if (tenantId) {
             config.headers['X-Tenant-Id'] = tenantId;
-            
+
             console.log('🏢 Added tenant headers:', {
               'X-Tenant-Id': tenantId,
             });
           }
-          
+
           if (tenant.slug) {
             config.headers['X-Tenant-Slug'] = tenant.slug;
           }
@@ -194,7 +194,7 @@ crmClient.interceptors.request.use(
     } catch (error) {
       console.error('❌ Failed to parse user or attach tenant headers:', error);
     }
-    
+
     return config;
   },
   (error) => {
@@ -215,29 +215,29 @@ authClient.interceptors.response.use(
       status: error.response?.status,
       data: error.response?.data
     });
-    
+
     // Handle 401 Unauthorized - token expired or invalid
     if (error.response?.status === 401) {
       tokenManager.removeTokens();
       localStorage.removeItem(USER_KEY);
-      
+
       // Only redirect to login if not already on login page
       if (!window.location.pathname.includes('/login')) {
         console.log('↪️ Redirecting to login...');
         window.location.href = '/login';
       }
     }
-    
+
     // Handle 403 Forbidden
     if (error.response?.status === 403) {
       console.error('🚫 Access forbidden:', error.response.data);
     }
-    
+
     // Handle network errors
     if (!error.response) {
       console.error('🌐 Network error:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -276,7 +276,7 @@ crmClient.interceptors.response.use(
 
           const { access, refresh } = response.data;
           tokenManager.setAccessToken(access);
-          
+
           // Update refresh token if provided
           if (refresh) {
             tokenManager.setRefreshToken(refresh);
@@ -290,11 +290,11 @@ crmClient.interceptors.response.use(
         }
       } catch (refreshError) {
         console.error('❌ Token refresh failed:', refreshError);
-        
+
         // Refresh failed, clear tokens and redirect to login
         tokenManager.removeTokens();
         localStorage.removeItem(USER_KEY);
-        
+
         if (!window.location.pathname.includes('/login')) {
           console.log('↪️ Redirecting to login...');
           window.location.href = '/login';
@@ -307,12 +307,12 @@ crmClient.interceptors.response.use(
     if (error.response?.status === 403) {
       console.error('🚫 CRM access forbidden:', error.response.data);
     }
-    
+
     // Handle network errors
     if (!error.response) {
       console.error('🌐 Network error:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );

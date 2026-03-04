@@ -71,8 +71,12 @@ import { BrokerFieldConfigs } from "./pages/broker-portal/BrokerFieldConfigs";
 import { BrokerInventory } from "./pages/broker-portal/BrokerInventory";
 import { BrokerUnits } from "./pages/broker-portal/BrokerUnits";
 import { BrokerBookings } from "./pages/broker-portal/BrokerBookings";
+import { BrokerNetwork } from "./pages/broker-portal/BrokerNetwork";
 import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
 import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
+import { BrokerTasks } from "./pages/broker-portal/BrokerTasks";
+import { BrokerMeetings } from "./pages/broker-portal/BrokerMeetings";
+import { BrokerPayments } from "./pages/broker-portal/BrokerPayments";
 
 // Analytics
 import { Analytics } from "./pages/Analytics";
@@ -227,7 +231,11 @@ const App = () => {
                   <Route path="inventory" element={<BrokerInventory />} />
                   <Route path="inventory/units" element={<BrokerUnits />} />
                   <Route path="bookings" element={<BrokerBookings />} />
+                  <Route path="payments" element={<BrokerPayments />} />
+                  <Route path="network" element={<BrokerNetwork />} />
                   <Route path="me" element={<BrokerProfile />} />
+                  <Route path="tasks" element={<BrokerTasks />} />
+                  <Route path="meetings" element={<BrokerMeetings />} />
                 </Route>
 
                 <Route

@@ -142,7 +142,6 @@ const LeadDetailsForm = forwardRef<LeadFormHandle, LeadDetailsFormProps>(
         ...(isFieldVisible('source') && {
           source: z.string().max(100).optional(),
         }),
-        owner_user_id: z.string().optional(),
         ...(isFieldVisible('assigned_to') && {
           assigned_to: z.string().optional(),
         }),
@@ -236,7 +235,6 @@ const LeadDetailsForm = forwardRef<LeadFormHandle, LeadDetailsFormProps>(
         value_amount: lead?.value_amount || '',
         value_currency: lead?.value_currency || getCurrencyCode(),
         source: lead?.source || '',
-        owner_user_id: lead?.owner_user_id || user?.id || '',
         assigned_to: lead?.assigned_to || '',
         last_contacted_at: lead?.last_contacted_at || '',
         next_follow_up_at: lead?.next_follow_up_at || '',
@@ -525,7 +523,7 @@ const LeadDetailsForm = forwardRef<LeadFormHandle, LeadDetailsFormProps>(
                       {field.value && !isReadOnly && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => field.onChange('')} type="button">
                           <span className="sr-only">Clear</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                         </Button>
                       )}
                     </div>

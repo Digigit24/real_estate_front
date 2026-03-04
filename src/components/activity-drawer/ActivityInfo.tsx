@@ -45,7 +45,6 @@ const activitySchema = z.object({
   type: z.enum(['CALL', 'EMAIL', 'MEETING', 'NOTE', 'SMS', 'OTHER']),
   content: z.string().optional(),
   happened_at: z.string().min(1, 'Date and time is required'),
-  by_user_id: z.string().optional(),
   meta: z.record(z.any()).optional(),
   file_url: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
@@ -84,7 +83,6 @@ const ActivityInfo = forwardRef<ActivityFormHandle, ActivityInfoProps>(
         type: 'NOTE',
         content: '',
         happened_at: new Date().toISOString(),
-        by_user_id: user?.id || '',
         meta: {},
         file_url: '',
       },
@@ -97,7 +95,6 @@ const ActivityInfo = forwardRef<ActivityFormHandle, ActivityInfoProps>(
           type: activity.type,
           content: activity.content || '',
           happened_at: activity.happened_at,
-          by_user_id: activity.by_user_id || user?.id || '',
           meta: activity.meta || {},
           file_url: activity.file_url || '',
         });
@@ -107,7 +104,6 @@ const ActivityInfo = forwardRef<ActivityFormHandle, ActivityInfoProps>(
           type: 'NOTE',
           content: '',
           happened_at: new Date().toISOString(),
-          by_user_id: user?.id || '',
           meta: {},
           file_url: '',
         });
@@ -124,7 +120,6 @@ const ActivityInfo = forwardRef<ActivityFormHandle, ActivityInfoProps>(
                 type: data.type as ActivityTypeEnum,
                 content: data.content || undefined,
                 happened_at: data.happened_at,
-                by_user_id: data.by_user_id || undefined,
                 meta: Object.keys(data.meta || {}).length > 0 ? data.meta : undefined,
                 file_url: data.file_url || undefined,
               };

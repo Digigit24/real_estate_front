@@ -59,6 +59,13 @@ const menuSections: MenuSection[] = [
         ],
     },
     {
+        label: "WORKFLOW",
+        items: [
+            { id: "tasks", label: "Tasks", icon: ClipboardList, path: "/broker-portal/tasks" },
+            { id: "meetings", label: "Meetings", icon: Users, path: "/broker-portal/meetings" },
+        ],
+    },
+    {
         label: "INVENTORY",
         items: [
             { id: "projects", label: "Projects", icon: Building2, path: "/broker-portal/inventory" },
@@ -66,9 +73,16 @@ const menuSections: MenuSection[] = [
         ],
     },
     {
-        label: "BOOKINGS",
+        label: "BOOKINGS & FINANCE",
         items: [
-            { id: "bookings", label: "Bookings & Payments", icon: CreditCard, path: "/broker-portal/bookings" },
+            { id: "bookings", label: "Bookings", icon: CreditCard, path: "/broker-portal/bookings" },
+            { id: "payments", label: "Payments Ledger", icon: CreditCard, path: "/broker-portal/payments" },
+        ],
+    },
+    {
+        label: "NETWORK",
+        items: [
+            { id: "network", label: "Network Directory", icon: Users, path: "/broker-portal/network" },
         ],
     },
     {

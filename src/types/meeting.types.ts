@@ -18,7 +18,6 @@ export interface Meeting {
   notes: string | null;
   start_at: string; // ISO datetime string
   end_at: string; // ISO datetime string
-  owner_user_id?: string;
   created_at: string;
   updated_at: string;
 }
