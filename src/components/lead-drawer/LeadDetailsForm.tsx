@@ -1,14 +1,25 @@
 // src/components/lead-drawer/LeadDetailsForm.tsx
-import { forwardRef, useImperativeHandle, useEffect, useMemo } from 'react';
-import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon, ChevronDown, MapPin, Sparkles } from 'lucide-react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
 
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -16,30 +27,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 import { DynamicFieldRenderer } from '@/components/crm/DynamicFieldRenderer';
 import { LeadScoreSlider } from '@/components/crm/LeadScoreSlider';
-import type { Lead, CreateLeadPayload, PriorityEnum } from '@/types/crmTypes';
-import type { LeadFormHandle } from '../LeadsFormDrawer';
-import { useCRM } from '@/hooks/useCRM';
 import { useAuth } from '@/hooks/useAuth';
-import { useUsers } from '@/hooks/useUsers';
+import { useCRM } from '@/hooks/useCRM';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useUsers } from '@/hooks/useUsers';
+import type { CreateLeadPayload, Lead } from '@/types/crmTypes';
 import { PRIORITY_OPTIONS } from '@/types/crmTypes';
+import type { LeadFormHandle } from '../LeadsFormDrawer';
 
 interface LeadDetailsFormProps {
   lead?: Lead | null;
@@ -525,7 +524,7 @@ const LeadDetailsForm = forwardRef<LeadFormHandle, LeadDetailsFormProps>(
                       {field.value && !isReadOnly && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => field.onChange('')} type="button">
                           <span className="sr-only">Clear</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                         </Button>
                       )}
                     </div>

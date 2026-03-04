@@ -1,17 +1,17 @@
 // src/components/LeadsFormDrawer.tsx
-import { useEffect, useState, useCallback, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Pencil, Trash2, Phone, Mail, MessageCircle } from 'lucide-react';
+import { Mail, MessageCircle, Pencil, Phone, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import type { Lead, CreateLeadPayload, UpdateLeadPayload } from '@/types/crmTypes';
 import { useCRM } from '@/hooks/useCRM';
+import type { CreateLeadPayload, UpdateLeadPayload } from '@/types/crmTypes';
 
-import LeadDetailsForm from './lead-drawer/LeadDetailsForm';
-import LeadActivities from './lead-drawer/LeadActivities';
-import { LeadTasks } from './lead-drawer/LeadTasks';
-import { LeadMeetings } from './lead-drawer/LeadMeetings';
 import { SideDrawer, type DrawerActionButton, type DrawerHeaderAction } from '@/components/SideDrawer';
+import LeadActivities from './lead-drawer/LeadActivities';
+import LeadDetailsForm from './lead-drawer/LeadDetailsForm';
+import { LeadMeetings } from './lead-drawer/LeadMeetings';
+import { LeadTasks } from './lead-drawer/LeadTasks';
 
 // Form handle interface for collecting form values
 export interface LeadFormHandle {
@@ -146,8 +146,8 @@ export function LeadsFormDrawer({
       console.error('Save error:', error);
       toast.error(
         error?.response?.data?.detail ||
-          error?.message ||
-          'Failed to save lead'
+        error?.message ||
+        'Failed to save lead'
       );
     } finally {
       setIsSaving(false);
@@ -163,8 +163,8 @@ export function LeadsFormDrawer({
     currentMode === 'create'
       ? undefined
       : lead
-      ? `${lead.phone}${lead.company ? ` • ${lead.company}` : ''}`
-      : undefined;
+        ? `${lead.phone}${lead.company ? ` • ${lead.company}` : ''}`
+        : undefined;
 
   const handleWhatsApp = useCallback(() => {
     if (!lead?.phone) {
@@ -197,54 +197,54 @@ export function LeadsFormDrawer({
   const headerActions: DrawerHeaderAction[] =
     currentMode === 'view' && lead
       ? [
-          {
-            icon: Phone,
-            onClick: () => window.open(`tel:${lead.phone}`, '_self'),
-            label: 'Call lead',
-            variant: 'ghost',
-          },
-          {
-            icon: MessageCircle,
-            onClick: handleWhatsApp,
-            label: 'WhatsApp',
-            variant: 'ghost',
-          },
-          ...(lead.email
-            ? [
-                {
-                  icon: Mail as React.ComponentType<{ className?: string }>,
-                  onClick: () => window.open(`mailto:${lead.email}`, '_self'),
-                  label: 'Email lead',
-                  variant: 'ghost' as const,
-                },
-              ]
-            : []),
-          {
-            icon: Pencil,
-            onClick: handleSwitchToEdit,
-            label: 'Edit lead',
-            variant: 'ghost',
-          },
-          {
-            icon: Trash2,
-            onClick: handleDelete,
-            label: 'Delete lead',
-            variant: 'ghost',
-          },
-        ]
+        {
+          icon: Phone,
+          onClick: () => window.open(`tel:${lead.phone}`, '_self'),
+          label: 'Call lead',
+          variant: 'ghost',
+        },
+        {
+          icon: MessageCircle,
+          onClick: handleWhatsApp,
+          label: 'WhatsApp',
+          variant: 'ghost',
+        },
+        ...(lead.email
+          ? [
+            {
+              icon: Mail as React.ComponentType<{ className?: string }>,
+              onClick: () => window.open(`mailto:${lead.email}`, '_self'),
+              label: 'Email lead',
+              variant: 'ghost' as const,
+            },
+          ]
+          : []),
+        {
+          icon: Pencil,
+          onClick: handleSwitchToEdit,
+          label: 'Edit lead',
+          variant: 'ghost',
+        },
+        {
+          icon: Trash2,
+          onClick: handleDelete,
+          label: 'Delete lead',
+          variant: 'ghost',
+        },
+      ]
       : [];
 
   const footerButtons: DrawerActionButton[] =
     currentMode === 'view'
       ? [
-          {
-            label: 'Close',
-            onClick: handleClose,
-            variant: 'outline',
-          },
-        ]
+        {
+          label: 'Close',
+          onClick: handleClose,
+          variant: 'outline',
+        },
+      ]
       : currentMode === 'edit'
-      ? [
+        ? [
           {
             label: 'Cancel',
             onClick: handleSwitchToView,
@@ -258,7 +258,7 @@ export function LeadsFormDrawer({
             loading: isSaving,
           },
         ]
-      : [
+        : [
           {
             label: 'Cancel',
             onClick: handleClose,
@@ -278,13 +278,13 @@ export function LeadsFormDrawer({
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full h-9 bg-muted/50 p-0.5 rounded-lg">
           <TabsTrigger value="details" className="flex-1 text-[13px] h-full rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">Details</TabsTrigger>
-          <TabsTrigger value="activities" className="flex-1 text-[13px] h-full rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm" disabled={currentMode === 'create'}>
+          <TabsTrigger value="activities" className="flex-1 text-[13px] h-full rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
             Activities
           </TabsTrigger>
-          <TabsTrigger value="tasks" className="flex-1 text-[13px] h-full rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm" disabled={currentMode === 'create'}>
+          <TabsTrigger value="tasks" className="flex-1 text-[13px] h-full rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
             Tasks
           </TabsTrigger>
-          <TabsTrigger value="meetings" className="flex-1 text-[13px] h-full rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm" disabled={currentMode === 'create'}>
+          <TabsTrigger value="meetings" className="flex-1 text-[13px] h-full rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
             Meetings
           </TabsTrigger>
         </TabsList>
@@ -294,15 +294,33 @@ export function LeadsFormDrawer({
         </TabsContent>
 
         <TabsContent value="activities" className="mt-5">
-          {leadId && <LeadActivities leadId={leadId} />}
+          {leadId ? <LeadActivities leadId={leadId} /> : (
+            <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground border rounded-lg bg-muted/20">
+              <MessageCircle className="h-10 w-10 mb-4 opacity-50" />
+              <p className="text-sm font-medium">Create Lead First</p>
+              <p className="text-xs mt-1">Please save the lead details to manage activities.</p>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-5">
-          {leadId && <LeadTasks leadId={leadId} />}
+          {leadId ? <LeadTasks leadId={leadId} /> : (
+            <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground border rounded-lg bg-muted/20">
+              <Pencil className="h-10 w-10 mb-4 opacity-50" />
+              <p className="text-sm font-medium">Create Lead First</p>
+              <p className="text-xs mt-1">Please save the lead details to add tasks.</p>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="meetings" className="mt-5">
-          {leadId && <LeadMeetings leadId={leadId} />}
+          {leadId ? <LeadMeetings leadId={leadId} /> : (
+            <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground border rounded-lg bg-muted/20">
+              <Phone className="h-10 w-10 mb-4 opacity-50" />
+              <p className="text-sm font-medium">Create Lead First</p>
+              <p className="text-xs mt-1">Please save the lead details to schedule meetings.</p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
