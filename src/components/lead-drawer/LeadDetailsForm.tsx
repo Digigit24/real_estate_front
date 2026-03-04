@@ -111,8 +111,7 @@ const LeadDetailsForm = forwardRef<LeadFormHandle, LeadDetailsFormProps>(
         ...(isFieldVisible('phone') && {
           phone: z.string()
             .min(10, 'Phone must be at least 10 digits')
-            .max(10, 'Phone must be at most 10 digits')
-            .regex(/^\d{10}$/, 'Phone must be exactly 10 digits'),
+            .max(10, 'Phone must be at most 10 digits'),
         }),
         ...(isFieldVisible('email') && {
           email: z.string().email('Invalid email').optional().or(z.literal('')),
@@ -141,9 +140,9 @@ const LeadDetailsForm = forwardRef<LeadFormHandle, LeadDetailsFormProps>(
         ...(isFieldVisible('source') && {
           source: z.string().max(100).optional(),
         }),
-        owner_user_id: z.string().optional(),
+        owner_user_id: z.coerce.string().optional(),
         ...(isFieldVisible('assigned_to') && {
-          assigned_to: z.string().optional(),
+          assigned_to: z.coerce.string().optional(),
         }),
         last_contacted_at: z.string().optional(),
         ...(isFieldVisible('next_follow_up_at') && {
@@ -293,7 +292,13 @@ const LeadDetailsForm = forwardRef<LeadFormHandle, LeadDetailsFormProps>(
                 metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
               });
             },
-            () => resolve(null)
+            (validationErrors) => {
+              console.error('❌ Lead form validation errors:', validationErrors);
+              Object.entries(validationErrors).forEach(([field, err]: [string, any]) => {
+                console.error(`  Field "${field}": ${err?.message || JSON.stringify(err)}`);
+              });
+              resolve(null);
+            }
           )();
         });
       },

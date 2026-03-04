@@ -1,15 +1,13 @@
 // src/components/contact-drawer/ContactBasicInfo.tsx
+import { zodResolver } from '@hookform/resolvers/zod';
 import { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -17,8 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { X } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { useUsers } from '@/hooks/useUsers';
+import { X } from 'lucide-react';
 
 import type { Contact, CreateContactPayload } from '@/types/whatsappTypes';
 import type { ContactBasicInfoHandle } from '../ContactsFormDrawer';
@@ -28,7 +28,7 @@ const contactSchema = z.object({
   phone: z.string().min(1, 'Phone number is required'),
   name: z.string().optional(),
   status: z.string().optional(),
-  assigned_to: z.string().optional(),
+  assigned_to: z.coerce.string().optional(),
   profile_pic_url: z.string().optional(),
   notes: z.string().optional(),
   labels: z.array(z.string()).optional(),

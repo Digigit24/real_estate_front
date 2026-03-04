@@ -1,14 +1,20 @@
 // src/components/lead-drawer/LeadBasicInfo.tsx
-import { forwardRef, useImperativeHandle, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
+import { forwardRef, useEffect, useImperativeHandle } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
 
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -16,22 +22,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-import type { Lead, CreateLeadPayload, PriorityEnum } from '@/types/crmTypes';
-import type { LeadFormHandle } from '../LeadsFormDrawer';
-import { useCRM } from '@/hooks/useCRM';
 import { useAuth } from '@/hooks/useAuth';
-import { useUsers } from '@/hooks/useUsers';
+import { useCRM } from '@/hooks/useCRM';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useUsers } from '@/hooks/useUsers';
+import type { CreateLeadPayload, Lead, PriorityEnum } from '@/types/crmTypes';
 import { PRIORITY_OPTIONS } from '@/types/crmTypes';
+import type { LeadFormHandle } from '../LeadsFormDrawer';
 
 const leadBasicSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name is too long'),
@@ -44,8 +44,8 @@ const leadBasicSchema = z.object({
   value_amount: z.string().optional(),
   value_currency: z.string().max(3, 'Currency code too long').optional(),
   source: z.string().max(100, 'Source is too long').optional(),
-  owner_user_id: z.string().optional(),
-  assigned_to: z.string().optional(),
+  owner_user_id: z.coerce.string().optional(),
+  assigned_to: z.coerce.string().optional(),
   last_contacted_at: z.string().optional(),
   next_follow_up_at: z.string().optional(),
   notes: z.string().optional(),

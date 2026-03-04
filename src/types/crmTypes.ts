@@ -406,7 +406,7 @@ export interface CreateLeadActivityPayload {
   content?: string;
   happened_at: string;
   by_user_id?: string;
-  meta?: Record<string, any>;
+  meta?: string;
   file_url?: string;
 }
 

@@ -1,31 +1,31 @@
 // src/hooks/useInventory.ts
-import { useState, useCallback } from 'react';
-import useSWR from 'swr';
 import { inventoryService } from '@/services/inventoryService';
 import {
-  Project,
-  Tower,
-  Unit,
-  UnitGridResponse,
-  InventorySummary,
-  PriceCalculation,
-  ProjectsResponse,
-  TowersResponse,
-  UnitsResponse,
-  ProjectsQueryParams,
-  TowersQueryParams,
-  UnitsQueryParams,
-  UnitSuggestParams,
-  CreateProjectPayload,
-  UpdateProjectPayload,
-  CreateTowerPayload,
-  UpdateTowerPayload,
-  CreateUnitPayload,
-  UpdateUnitPayload,
-  ReserveUnitPayload,
-  UpdateUnitStatusPayload,
-  PriceCalculatorPayload,
+    CreateProjectPayload,
+    CreateTowerPayload,
+    CreateUnitPayload,
+    InventorySummary,
+    PriceCalculation,
+    PriceCalculatorPayload,
+    Project,
+    ProjectsQueryParams,
+    ProjectsResponse,
+    ReserveUnitPayload,
+    Tower,
+    TowersQueryParams,
+    TowersResponse,
+    Unit,
+    UnitGridResponse,
+    UnitsQueryParams,
+    UnitsResponse,
+    UnitSuggestParams,
+    UpdateProjectPayload,
+    UpdateTowerPayload,
+    UpdateUnitPayload,
+    UpdateUnitStatusPayload,
 } from '@/types/inventoryTypes';
+import { useCallback, useState } from 'react';
+import useSWR from 'swr';
 
 export const useInventory = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -189,7 +189,7 @@ export const useInventory = () => {
 
   const useUnits = (params?: UnitsQueryParams) => {
     return useSWR<UnitsResponse>(
-      params?.tower ? ['units', params] : null,
+      ['units', params],
       () => inventoryService.getUnits(params),
       {
         revalidateOnFocus: false,
