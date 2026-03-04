@@ -84,7 +84,6 @@ const ActivityInfo = forwardRef<ActivityFormHandle, ActivityInfoProps>(
         type: 'NOTE',
         content: '',
         happened_at: new Date().toISOString(),
-        by_user_id: user?.id || '',
         meta: {},
         file_url: '',
       },
@@ -97,7 +96,6 @@ const ActivityInfo = forwardRef<ActivityFormHandle, ActivityInfoProps>(
           type: activity.type,
           content: activity.content || '',
           happened_at: activity.happened_at,
-          by_user_id: activity.by_user_id || user?.id || '',
           meta: activity.meta || {},
           file_url: activity.file_url || '',
         });
@@ -107,7 +105,6 @@ const ActivityInfo = forwardRef<ActivityFormHandle, ActivityInfoProps>(
           type: 'NOTE',
           content: '',
           happened_at: new Date().toISOString(),
-          by_user_id: user?.id || '',
           meta: {},
           file_url: '',
         });

@@ -118,7 +118,6 @@ export function BrokerFormDrawer({
       ...(formData.rera_number && { rera_number: formData.rera_number.trim() }),
       ...(formData.city && { city: formData.city.trim() }),
       ...(formData.status && { status: formData.status }),
-      ...(user?.id && !isEditing ? { owner_user_id: user.id } : {}),
     };
 
     await onSubmit(payload);

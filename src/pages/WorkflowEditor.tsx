@@ -77,7 +77,8 @@ export const WorkflowEditor = () => {
     workflowId ? parseInt(workflowId) : undefined
   );
   const { data: mappings, mutate: mutateMappings } = useWorkflowMappings(
-    workflowId ? parseInt(workflowId) : undefined
+    workflowId ? parseInt(workflowId) : undefined,
+    actions?.[0]?.id
   );
 
   // Form state
@@ -394,9 +395,9 @@ export const WorkflowEditor = () => {
   };
 
   const handleDeleteMapping = async (mappingId: number) => {
-    if (!workflowId) return;
+    if (!workflowId || !actions || actions.length === 0) return;
     try {
-      await deleteWorkflowMapping(parseInt(workflowId), mappingId);
+      await deleteWorkflowMapping(parseInt(workflowId), actions[0].id, mappingId);
       toast.success('Mapping deleted');
       mutateMappings();
     } catch (error: any) {
@@ -447,9 +448,8 @@ export const WorkflowEditor = () => {
     const actionId = actions[0].id;
     try {
       for (const mapping of pendingMappings) {
-        await createWorkflowMapping(parseInt(workflowId), {
+        await createWorkflowMapping(parseInt(workflowId), actionId, {
           ...mapping,
-          workflow_action_id: actionId,
         });
       }
       toast.success('Field mappings saved successfully');
@@ -469,8 +469,8 @@ export const WorkflowEditor = () => {
     // Auto-set transformation type for known fields
     const suggestedTransform =
       value === 'phone' ? 'PHONE' :
-      value === 'email' ? 'EMAIL' :
-      'TEXT';
+        value === 'email' ? 'EMAIL' :
+          'TEXT';
 
     setNewMapping({
       ...newMapping,

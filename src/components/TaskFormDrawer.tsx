@@ -111,7 +111,6 @@ export const TaskFormDrawer: React.FC<TaskFormDrawerProps> = ({
         description: description.trim() || undefined,
         priority,
         status,
-        owner_user_id: user?.id,
       };
 
       if (mode === 'create') {
@@ -168,8 +167,8 @@ export const TaskFormDrawer: React.FC<TaskFormDrawerProps> = ({
     mode === 'create'
       ? 'Create New Task'
       : mode === 'edit'
-      ? 'Edit Task'
-      : 'Task Details';
+        ? 'Edit Task'
+        : 'Task Details';
 
   const drawerDescription =
     mode !== 'create' && task
@@ -179,32 +178,32 @@ export const TaskFormDrawer: React.FC<TaskFormDrawerProps> = ({
   const headerActions: DrawerHeaderAction[] =
     mode === 'view' && task
       ? [
-          {
-            icon: Pencil,
-            onClick: handleSwitchToEdit,
-            label: 'Edit task',
-            variant: 'ghost',
-          },
-          {
-            icon: Trash2,
-            onClick: handleDelete,
-            label: 'Delete task',
-            variant: 'ghost',
-          },
-        ]
+        {
+          icon: Pencil,
+          onClick: handleSwitchToEdit,
+          label: 'Edit task',
+          variant: 'ghost',
+        },
+        {
+          icon: Trash2,
+          onClick: handleDelete,
+          label: 'Delete task',
+          variant: 'ghost',
+        },
+      ]
       : [];
 
   const footerButtons: DrawerActionButton[] =
     mode === 'view'
       ? [
-          {
-            label: 'Close',
-            onClick: handleClose,
-            variant: 'outline',
-          },
-        ]
+        {
+          label: 'Close',
+          onClick: handleClose,
+          variant: 'outline',
+        },
+      ]
       : mode === 'edit'
-      ? [
+        ? [
           {
             label: 'Cancel',
             onClick: handleSwitchToView,
@@ -218,7 +217,7 @@ export const TaskFormDrawer: React.FC<TaskFormDrawerProps> = ({
             loading: isSubmitting,
           },
         ]
-      : [
+        : [
           {
             label: 'Cancel',
             onClick: handleClose,

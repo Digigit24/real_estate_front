@@ -371,10 +371,10 @@ class IntegrationService {
   }
 
   // Toggle workflow active status
-  async toggleWorkflowActive(id: number): Promise<Workflow> {
+  async toggleWorkflow(id: number): Promise<Workflow> {
     try {
       const response = await crmClient.post<Workflow>(
-        API_CONFIG.CRM.WORKFLOWS.TOGGLE_ACTIVE.replace(':id', id.toString())
+        API_CONFIG.CRM.WORKFLOWS.TOGGLE.replace(':id', id.toString())
       );
       return response.data;
     } catch (error: any) {
@@ -516,11 +516,13 @@ class IntegrationService {
 
   // ==================== WORKFLOW MAPPINGS ====================
 
-  // Get mappings for a workflow
-  async getWorkflowMappings(workflowId: number): Promise<WorkflowMapping[]> {
+  // Get mappings for an action
+  async getWorkflowMappings(workflowId: number, actionId: number): Promise<WorkflowMapping[]> {
     try {
       const response = await crmClient.get<WorkflowMapping[] | PaginatedResponse<WorkflowMapping>>(
-        API_CONFIG.CRM.WORKFLOWS.MAPPINGS.replace(':workflow_id', workflowId.toString())
+        API_CONFIG.CRM.WORKFLOWS.MAPPINGS
+          .replace(':workflow_id', workflowId.toString())
+          .replace(':action_id', actionId.toString())
       );
       return unwrapListResponse(response.data);
     } catch (error: any) {
@@ -530,11 +532,13 @@ class IntegrationService {
   }
 
   // Create workflow mapping
-  async createWorkflowMapping(workflowId: number, data: Omit<WorkflowMappingCreateData, 'workflow'>): Promise<WorkflowMapping> {
+  async createWorkflowMapping(workflowId: number, actionId: number, data: Omit<WorkflowMappingCreateData, 'workflow'>): Promise<WorkflowMapping> {
     try {
       const response = await crmClient.post<WorkflowMapping>(
-        API_CONFIG.CRM.WORKFLOWS.MAPPINGS.replace(':workflow_id', workflowId.toString()),
-        { ...data, workflow: workflowId }
+        API_CONFIG.CRM.WORKFLOWS.MAPPINGS
+          .replace(':workflow_id', workflowId.toString())
+          .replace(':action_id', actionId.toString()),
+        { ...data, workflow: workflowId, action: actionId }
       );
       return response.data;
     } catch (error: any) {
@@ -544,11 +548,12 @@ class IntegrationService {
   }
 
   // Update workflow mapping
-  async updateWorkflowMapping(workflowId: number, mappingId: number, data: WorkflowMappingUpdateData): Promise<WorkflowMapping> {
+  async updateWorkflowMapping(workflowId: number, actionId: number, mappingId: number, data: WorkflowMappingUpdateData): Promise<WorkflowMapping> {
     try {
       const response = await crmClient.patch<WorkflowMapping>(
         API_CONFIG.CRM.WORKFLOWS.MAPPING_DETAIL
           .replace(':workflow_id', workflowId.toString())
+          .replace(':action_id', actionId.toString())
           .replace(':id', mappingId.toString()),
         data
       );
@@ -560,11 +565,12 @@ class IntegrationService {
   }
 
   // Delete workflow mapping
-  async deleteWorkflowMapping(workflowId: number, mappingId: number): Promise<void> {
+  async deleteWorkflowMapping(workflowId: number, actionId: number, mappingId: number): Promise<void> {
     try {
       await crmClient.delete(
         API_CONFIG.CRM.WORKFLOWS.MAPPING_DETAIL
           .replace(':workflow_id', workflowId.toString())
+          .replace(':action_id', actionId.toString())
           .replace(':id', mappingId.toString())
       );
     } catch (error: any) {

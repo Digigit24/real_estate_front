@@ -33,79 +33,79 @@ export const Integrations = () => {
   const { data: workflowsData, error: workflowsError, isLoading: workflowsLoading, mutate: mutateWorkflows } = useWorkflowsList();
 
   // In your useEffect for OAuth callback, add a check
-useEffect(() => {
-  const code = searchParams.get('code');
-  const state = searchParams.get('state');
+  useEffect(() => {
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
 
-  // WAIT for integrations data to load before processing
-  if (code && state && !isProcessingOAuth && integrationsData?.results) {
-    logOAuth('Detected OAuth params in URL', { codePreview: `${code.slice(0, 6)}...`, state });
-    setIsProcessingOAuth(true);
+    // WAIT for integrations data to load before processing
+    if (code && state && !isProcessingOAuth && integrationsData?.results) {
+      logOAuth('Detected OAuth params in URL', { codePreview: `${code.slice(0, 6)}...`, state });
+      setIsProcessingOAuth(true);
 
-    const handleOAuthCallback = async () => {
-      try {
-        toast.info('Processing Google authorization...');
+      const handleOAuthCallback = async () => {
+        try {
+          toast.info('Processing Google authorization...');
 
-        const googleIntegration = integrationsData.results.find(
-          (integration) => integration.type === 'GOOGLE_SHEETS'
-        );
+          const googleIntegration = integrationsData.results.find(
+            (integration) => integration.type === 'GOOGLE_SHEETS'
+          );
 
-        if (!googleIntegration) {
-          logOAuth('Google integration not found in list', integrationsData.results);
-          throw new Error('Google Sheets integration not found');
+          if (!googleIntegration) {
+            logOAuth('Google integration not found in list', integrationsData.results);
+            throw new Error('Google Sheets integration not found');
+          }
+
+          // Construct the same redirect_uri used during OAuth initiation
+          let redirectUri = `${window.location.origin}${window.location.pathname}`;
+          if (!redirectUri.endsWith('/')) {
+            redirectUri += '/';
+          }
+
+          logOAuth('Posting OAuth callback to backend', {
+            integrationId: googleIntegration.id,
+            state,
+            redirectUri,
+          });
+
+          const data = await integrationService.oauthCallback({
+            code,
+            state,
+            integration_id: googleIntegration.id,
+            connection_name: 'Google Sheets',
+            redirect_uri: redirectUri,
+          });
+
+          logOAuth('OAuth callback response', data);
+          toast.success(`Successfully connected!`);
+          mutateConnections();
+          setActiveTab('connected');
+
+          searchParams.delete('code');
+          searchParams.delete('state');
+          searchParams.delete('scope');
+          setSearchParams(searchParams, { replace: true });
+
+        } catch (error: any) {
+          console.error('OAuth callback error:', error);
+          logOAuth('OAuth callback failed', {
+            message: error?.message,
+            response: error?.response?.data,
+            stack: error?.stack,
+          });
+          toast.error(`Connection failed: ${error.message}`);
+
+          searchParams.delete('code');
+          searchParams.delete('state');
+          searchParams.delete('scope');
+          setSearchParams(searchParams, { replace: true });
+        } finally {
+          setIsProcessingOAuth(false);
         }
+      };
 
-        // Construct the same redirect_uri used during OAuth initiation
-        let redirectUri = `${window.location.origin}${window.location.pathname}`;
-        if (!redirectUri.endsWith('/')) {
-          redirectUri += '/';
-        }
-
-        logOAuth('Posting OAuth callback to backend', {
-          integrationId: googleIntegration.id,
-          state,
-          redirectUri,
-        });
-
-        const data = await integrationService.oauthCallback({
-          code,
-          state,
-          integration_id: googleIntegration.id,
-          connection_name: 'Google Sheets',
-          redirect_uri: redirectUri,
-        });
-
-        logOAuth('OAuth callback response', data);
-        toast.success(`Successfully connected!`);
-        mutateConnections();
-        setActiveTab('connected');
-        
-        searchParams.delete('code');
-        searchParams.delete('state');
-        searchParams.delete('scope');
-        setSearchParams(searchParams, { replace: true });
-
-      } catch (error: any) {
-        console.error('OAuth callback error:', error);
-        logOAuth('OAuth callback failed', {
-          message: error?.message,
-          response: error?.response?.data,
-          stack: error?.stack,
-        });
-        toast.error(`Connection failed: ${error.message}`);
-
-        searchParams.delete('code');
-        searchParams.delete('state');
-        searchParams.delete('scope');
-        setSearchParams(searchParams, { replace: true });
-      } finally {
-        setIsProcessingOAuth(false);
-      }
-    };
-
-    handleOAuthCallback();
-  }
-}, [searchParams, setSearchParams, mutateConnections, isProcessingOAuth, integrationsData]); // ADD integrationsData to dependencies
+      handleOAuthCallback();
+    }
+  }, [searchParams, setSearchParams, mutateConnections, isProcessingOAuth, integrationsData]); // ADD integrationsData to dependencies
 
   // Handle OAuth callback success/error from backend redirect (legacy support)
   useEffect(() => {
@@ -239,89 +239,98 @@ useEffect(() => {
   }, [connectionsData]);
 
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-6 space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h1 className="text-base font-semibold">Integrations</h1>
-          <span className="text-xs text-muted-foreground">
-            {connectionsData?.count || 0} connected
-          </span>
+      <div className="flex items-center justify-between bg-white/50 p-4 rounded-xl border border-slate-200">
+        <div className="flex items-center gap-3">
+          <div className="bg-indigo-100 p-2 rounded-lg">
+            <Plug className="w-5 h-5 text-indigo-700" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-800">Integrations Workspace</h1>
+            <p className="text-sm text-slate-500">
+              Manage your active connections and automation workflows ({connectionsData?.count || 0} active).
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleRefresh}>
-            <RefreshCw className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="bg-white hover:bg-slate-50" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-1.5" /> Refresh
           </Button>
-          <Button onClick={handleCreateWorkflow} size="sm" className="h-7 text-xs">
-            <Plus className="h-3.5 w-3.5 mr-1" />
-            New Workflow
+          <Button onClick={handleCreateWorkflow} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md">
+            <Plus className="h-4 w-4 mr-1.5" /> New Workflow
           </Button>
         </div>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-        <TabsList className="h-8">
-          <TabsTrigger value="available" className="text-xs h-6 px-2.5">Available</TabsTrigger>
-          <TabsTrigger value="connected" className="text-xs h-6 px-2.5">Connected</TabsTrigger>
-          <TabsTrigger value="workflows" className="text-xs h-6 px-2.5">Workflows</TabsTrigger>
+        <TabsList className="bg-slate-100/50 border border-slate-200/60 p-1 mb-2">
+          <TabsTrigger value="available" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">App Marketplace</TabsTrigger>
+          <TabsTrigger value="connected" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Connected Apps</TabsTrigger>
+          <TabsTrigger value="workflows" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Active Workflows</TabsTrigger>
         </TabsList>
 
         {/* Available Integrations Tab */}
-        <TabsContent value="available" className="mt-3">
+        <TabsContent value="available" className="mt-4">
           {integrationsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="border rounded-lg p-4">
-                  <Skeleton className="h-8 w-8 rounded mb-3" />
-                  <Skeleton className="h-4 w-3/4 mb-2" />
-                  <Skeleton className="h-3 w-full mb-3" />
-                  <Skeleton className="h-7 w-full" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white border rounded-xl p-5 shadow-sm space-y-3">
+                  <Skeleton className="h-10 w-10 rounded-lg" />
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-9 w-full mt-2" />
                 </div>
               ))}
             </div>
           ) : integrationsError ? (
-            <div className="text-center py-8">
-              <p className="text-xs text-red-500">Failed to load integrations</p>
-              <Button variant="outline" size="sm" className="mt-2 h-7 text-xs" onClick={handleRefresh}>
+            <div className="bg-red-50 border border-red-200 rounded-xl text-center py-12">
+              <p className="text-sm font-medium text-red-600">Failed to load integration marketplace.</p>
+              <Button variant="outline" size="sm" className="mt-4 bg-white" onClick={handleRefresh}>
                 Try Again
               </Button>
             </div>
           ) : !integrationsData?.results?.length ? (
-            <div className="text-center py-8">
-              <Plug className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm font-medium">No integrations available</p>
+            <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl py-16 text-center">
+              <Plug className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+              <p className="text-lg font-medium text-slate-600">No Integrations Available</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {integrationsData.results.map((integration) => (
-                <div key={integration.id} className="border rounded-lg p-3 hover:shadow-sm transition-shadow">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="p-1.5 bg-gray-100 rounded">
+                <div key={integration.id} className="relative group bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md transition-all overflow-hidden flex flex-col h-full">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50/50 rounded-bl-[80px] -z-10 group-hover:scale-110 transition-transform"></div>
+
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-2.5 bg-slate-50 border border-slate-100 rounded-xl shadow-sm">
                       {integration.logo_url ? (
-                        <img src={integration.logo_url} alt={integration.name} className="h-5 w-5" />
+                        <img src={integration.logo_url} alt={integration.name} className="h-8 w-8 object-contain" />
                       ) : (
-                        <Plug className="h-5 w-5 text-gray-600" />
+                        <Plug className="h-8 w-8 text-slate-400" />
                       )}
                     </div>
                     {isConnected(integration.id) && (
-                      <Badge className="text-[10px] bg-green-100 text-green-800 border-green-200">
-                        Connected
+                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-medium tracking-wide">
+                        <Check className="w-3 h-3 mr-1" /> Connected
                       </Badge>
                     )}
                   </div>
-                  <h3 className="text-sm font-medium mb-1">{integration.name}</h3>
-                  <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                    {integration.description}
+
+                  <h3 className="text-base font-bold text-slate-800 mb-1.5">{integration.name}</h3>
+                  <p className="text-sm text-slate-500 line-clamp-2 mb-6 flex-1">
+                    {integration.description || `Integrate ${integration.name} directly into your workflow.`}
                   </p>
-                  <Button
-                    variant={isConnected(integration.id) ? 'outline' : 'default'}
-                    size="sm"
-                    className="w-full h-7 text-xs"
-                    onClick={() => handleConnectIntegration(integration)}
-                  >
-                    {isConnected(integration.id) ? 'Manage' : integration.requires_oauth ? 'Connect' : 'Add'}
-                  </Button>
+
+                  <div className="mt-auto">
+                    <Button
+                      variant={isConnected(integration.id) ? 'outline' : 'default'}
+                      className={`w-full ${isConnected(integration.id) ? 'bg-white hover:bg-slate-50 text-slate-700' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
+                      onClick={() => handleConnectIntegration(integration)}
+                    >
+                      {isConnected(integration.id) ? 'Manage Settings' : integration.requires_oauth ? 'Connect Account' : 'Manual Setup'}
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -329,63 +338,64 @@ useEffect(() => {
         </TabsContent>
 
         {/* Connected Apps Tab */}
-        <TabsContent value="connected" className="mt-3">
+        <TabsContent value="connected" className="mt-4">
           {connectionsLoading ? (
-            <div className="space-y-2">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-8 w-8 rounded" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-4 border rounded-xl bg-white">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10 rounded-lg" />
                     <div>
-                      <Skeleton className="h-4 w-28 mb-1" />
-                      <Skeleton className="h-3 w-36" />
+                      <Skeleton className="h-5 w-32 mb-1.5" />
+                      <Skeleton className="h-4 w-48" />
                     </div>
                   </div>
-                  <Skeleton className="h-7 w-16" />
+                  <Skeleton className="h-9 w-20" />
                 </div>
               ))}
             </div>
           ) : !connectionsData?.results?.length ? (
-            <div className="text-center py-8">
-              <Check className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm font-medium">No connected apps</p>
-              <Button onClick={() => setActiveTab('available')} size="sm" className="mt-2 h-7 text-xs">
-                Browse Integrations
+            <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl py-16 text-center">
+              <Check className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+              <p className="text-lg font-medium text-slate-600 mb-1">No Connected Apps</p>
+              <p className="text-sm text-slate-500 mb-4">Connect apps from the marketplace to build workflows.</p>
+              <Button onClick={() => setActiveTab('available')} className="bg-indigo-600 hover:bg-indigo-700">
+                Browse Marketplace
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {connectionsData.results.map((connection) => (
                 <div
                   key={connection.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md hover:border-indigo-200 transition-all group"
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-gray-100 rounded">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-slate-50 border border-slate-100 rounded-xl shadow-sm group-hover:scale-105 transition-transform">
                       {connection.integration_details?.logo_url ? (
-                        <img src={connection.integration_details.logo_url} alt={connection.name} className="h-4 w-4" />
+                        <img src={connection.integration_details.logo_url} alt={connection.name} className="h-6 w-6 object-contain" />
                       ) : (
-                        <Plug className="h-4 w-4 text-gray-600" />
+                        <Plug className="h-6 w-6 text-slate-400" />
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{connection.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {connection.integration_details?.name || 'Unknown'}
+                      <p className="text-[15px] font-bold text-slate-800">{connection.name}</p>
+                      <p className="text-sm font-medium text-slate-500">
+                        Via {connection.integration_details?.name || 'Manual'}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Badge variant={connection.is_active ? 'default' : 'secondary'} className="text-[10px]">
-                      {connection.is_active ? 'Active' : 'Inactive'}
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className={connection.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-300'}>
+                      {connection.is_active ? 'Active' : 'Offline'}
                     </Badge>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      className="h-6 text-xs"
+                      className="bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200"
                       onClick={() => navigate(`/integrations/connections/${connection.id}`)}
                     >
-                      Manage
+                      Settings
                     </Button>
                   </div>
                 </div>
@@ -395,68 +405,73 @@ useEffect(() => {
         </TabsContent>
 
         {/* Workflows Tab */}
-        <TabsContent value="workflows" className="mt-3">
+        <TabsContent value="workflows" className="mt-4">
           {workflowsLoading ? (
-            <div className="space-y-2">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="p-3 border rounded-lg">
-                  <Skeleton className="h-4 w-40 mb-2" />
-                  <Skeleton className="h-3 w-full mb-2" />
-                  <div className="flex gap-1">
-                    <Skeleton className="h-6 w-16" />
-                    <Skeleton className="h-6 w-16" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="p-5 border rounded-xl bg-white">
+                  <Skeleton className="h-5 w-48 mb-3" />
+                  <Skeleton className="h-4 w-3/4 mb-4" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-8 w-20" />
+                    <Skeleton className="h-8 w-20" />
                   </div>
                 </div>
               ))}
             </div>
           ) : !workflowsData?.results?.length ? (
-            <div className="text-center py-8">
-              <Workflow className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm font-medium">No workflows yet</p>
-              <Button onClick={handleCreateWorkflow} size="sm" className="mt-2 h-7 text-xs">
-                <Plus className="h-3.5 w-3.5 mr-1" />
-                Create Workflow
+            <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl py-16 text-center">
+              <Workflow className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+              <p className="text-lg font-medium text-slate-600 mb-1">No Active Workflows</p>
+              <p className="text-sm text-slate-500 mb-4">Create automated tasks between your connected applications.</p>
+              <Button onClick={handleCreateWorkflow} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Workflow
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
               {workflowsData.results.map((workflow) => (
                 <div
                   key={workflow.id}
-                  className="p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                  className="bg-white p-5 border border-slate-200 rounded-xl hover:shadow-lg transition-all cursor-pointer relative group flex flex-col h-full"
                   onClick={() => navigate(`/integrations/workflows/${workflow.id}`)}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-sm font-medium">{workflow.name}</h3>
-                    <Badge variant={workflow.is_active ? 'default' : 'secondary'} className="text-[10px]">
-                      {workflow.is_active ? 'Active' : 'Inactive'}
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-transparent opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity rounded-xl"></div>
+
+                  <div className="flex items-start justify-between mb-3 relative z-10">
+                    <h3 className="text-[15px] font-bold text-slate-800 tracking-tight leading-tight flex-1 pr-3">{workflow.name}</h3>
+                    <Badge variant="outline" className={`shrink-0 ${workflow.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                      {workflow.is_active ? 'Running' : 'Paused'}
                     </Badge>
                   </div>
-                  {workflow.description && (
-                    <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{workflow.description}</p>
-                  )}
-                  <div className="flex items-center gap-1">
+
+                  <p className="text-sm text-slate-500 mb-5 line-clamp-2 relative z-10 flex-1">
+                    {workflow.description || "Automated background task linking external modules."}
+                  </p>
+
+                  <div className="flex items-center gap-2 mt-auto relative z-10 pt-4 border-t border-slate-100">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      className="h-6 text-xs"
+                      className="flex-1 bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/integrations/workflows/${workflow.id}`);
                       }}
                     >
-                      Edit
+                      <Workflow className="w-3.5 h-3.5 mr-1.5" /> Edit Flow
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      className="h-6 text-xs"
+                      className="flex-1 bg-white hover:bg-slate-50 text-slate-600"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/integrations/workflows/${workflow.id}/logs`);
                       }}
                     >
-                      Logs
+                      <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> View Logs
                     </Button>
                   </div>
                 </div>

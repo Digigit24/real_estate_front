@@ -373,7 +373,6 @@ export interface CreateLeadPayload {
   value_amount?: string;
   value_currency?: string;
   source?: string;
-  owner_user_id?: string;
   assigned_to?: string;
   metadata?: Record<string, any>;
   last_contacted_at?: string;
@@ -387,7 +386,7 @@ export interface CreateLeadPayload {
   postal_code?: string;
 }
 
-export interface UpdateLeadPayload extends Partial<CreateLeadPayload> {}
+export interface UpdateLeadPayload extends Partial<CreateLeadPayload> { }
 
 export interface CreateLeadStatusPayload {
   name: string;
@@ -398,7 +397,7 @@ export interface CreateLeadStatusPayload {
   is_active?: boolean;
 }
 
-export interface UpdateLeadStatusPayload extends Partial<CreateLeadStatusPayload> {}
+export interface UpdateLeadStatusPayload extends Partial<CreateLeadStatusPayload> { }
 
 export interface CreateLeadActivityPayload {
   lead: number;
@@ -410,7 +409,7 @@ export interface CreateLeadActivityPayload {
   file_url?: string;
 }
 
-export interface UpdateLeadActivityPayload extends Partial<CreateLeadActivityPayload> {}
+export interface UpdateLeadActivityPayload extends Partial<CreateLeadActivityPayload> { }
 
 export interface CreateLeadOrderPayload {
   lead: number;
@@ -419,7 +418,7 @@ export interface CreateLeadOrderPayload {
   board_id?: number;
 }
 
-export interface UpdateLeadOrderPayload extends Partial<CreateLeadOrderPayload> {}
+export interface UpdateLeadOrderPayload extends Partial<CreateLeadOrderPayload> { }
 
 export interface CreateTaskPayload {
   lead: number;
@@ -433,7 +432,7 @@ export interface CreateTaskPayload {
   checklist?: any;
 }
 
-export interface UpdateTaskPayload extends Partial<CreateTaskPayload> {}
+export interface UpdateTaskPayload extends Partial<CreateTaskPayload> { }
 
 export interface CreateLeadFieldConfigurationPayload {
   field_name: string;
@@ -451,7 +450,7 @@ export interface CreateLeadFieldConfigurationPayload {
   validation_rules?: Record<string, any>;
 }
 
-export interface UpdateLeadFieldConfigurationPayload extends Partial<CreateLeadFieldConfigurationPayload> {}
+export interface UpdateLeadFieldConfigurationPayload extends Partial<CreateLeadFieldConfigurationPayload> { }
 
 // Filter and Sort Options
 export const PRIORITY_OPTIONS = [

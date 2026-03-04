@@ -86,7 +86,6 @@ export interface CreateBrokerPayload {
   commission_rate: string;
   city?: string;
   status?: BrokerStatusEnum;
-  owner_user_id?: string | number;
 }
 
 export type UpdateBrokerPayload = Partial<CreateBrokerPayload>;

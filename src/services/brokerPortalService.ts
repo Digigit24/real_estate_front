@@ -1,5 +1,6 @@
 // src/services/brokerPortalService.ts
 import axios from 'axios';
+import { crmClient } from '@/lib/client';
 import { API_CONFIG } from '@/lib/apiConfig';
 import {
     BrokerAuthResponse,
@@ -293,34 +294,29 @@ class BrokerPortalService {
 
     // ==================== STATUSES ====================
     async getStatuses(): Promise<any> {
-        this.applyPortalToken();
-        const response = await brokerClient.get(API_CONFIG.BROKER_PORTAL.STATUSES);
+        const response = await crmClient.get(API_CONFIG.BROKER_PORTAL.STATUSES);
         return response.data?.results || response.data || [];
     }
 
     async createStatus(payload: any): Promise<any> {
-        this.applyPortalToken();
-        const response = await brokerClient.post(API_CONFIG.BROKER_PORTAL.STATUSES, payload);
+        const response = await crmClient.post(API_CONFIG.BROKER_PORTAL.STATUSES, payload);
         return response.data;
     }
 
     async updateStatus(id: number, payload: any): Promise<any> {
-        this.applyPortalToken();
         const url = API_CONFIG.BROKER_PORTAL.STATUS_DETAIL.replace(':id', id.toString());
-        const response = await brokerClient.patch(url, payload);
+        const response = await crmClient.patch(url, payload);
         return response.data;
     }
 
     async deleteStatus(id: number): Promise<any> {
-        this.applyPortalToken();
         const url = API_CONFIG.BROKER_PORTAL.STATUS_DETAIL.replace(':id', id.toString());
-        const response = await brokerClient.delete(url);
+        const response = await crmClient.delete(url);
         return response.data;
     }
 
     async initializeDefaultStatuses(): Promise<any> {
-        this.applyPortalToken();
-        const response = await brokerClient.post(API_CONFIG.BROKER_PORTAL.STATUS_INIT);
+        const response = await crmClient.post(API_CONFIG.BROKER_PORTAL.STATUS_INIT);
         return response.data;
     }
 
@@ -492,6 +488,68 @@ class BrokerPortalService {
         this.applyPortalToken();
         const response = await brokerClient.get(API_CONFIG.BROKER_PORTAL.BOOKING_UPCOMING_PAYMENTS);
         return response.data?.results || response.data || [];
+    }
+
+    // (Admin methods extracted to brokerAdminService.ts)
+
+    // ==================== PAYMENTS ====================
+    async getPayments(params?: any): Promise<any> {
+        this.applyPortalToken();
+        const response = await brokerClient.get(API_CONFIG.BROKER_PORTAL.PAYMENTS, { params: params || {} });
+        return response.data?.results || response.data || [];
+    }
+
+    async createPayment(payload: any): Promise<any> {
+        this.applyPortalToken();
+        const response = await brokerClient.post(API_CONFIG.BROKER_PORTAL.PAYMENTS, payload);
+        return response.data;
+    }
+
+    async updatePayment(id: number, payload: any): Promise<any> {
+        this.applyPortalToken();
+        const url = API_CONFIG.BROKER_PORTAL.PAYMENT_DETAIL.replace(':id', id.toString());
+        const response = await brokerClient.patch(url, payload);
+        return response.data;
+    }
+
+    // ==================== TASKS ====================
+    async getTasks(params?: any): Promise<any> {
+        this.applyPortalToken();
+        const response = await brokerClient.get(API_CONFIG.BROKER_PORTAL.TASKS, { params: params || {} });
+        return response.data?.results || response.data || [];
+    }
+
+    async createTask(payload: any): Promise<any> {
+        this.applyPortalToken();
+        const response = await brokerClient.post(API_CONFIG.BROKER_PORTAL.TASKS, payload);
+        return response.data;
+    }
+
+    async updateTask(id: number, payload: any): Promise<any> {
+        this.applyPortalToken();
+        const url = API_CONFIG.BROKER_PORTAL.TASK_DETAIL.replace(':id', id.toString());
+        const response = await brokerClient.patch(url, payload);
+        return response.data;
+    }
+
+    // ==================== MEETINGS ====================
+    async getMeetings(params?: any): Promise<any> {
+        this.applyPortalToken();
+        const response = await brokerClient.get(API_CONFIG.BROKER_PORTAL.MEETINGS, { params: params || {} });
+        return response.data?.results || response.data || [];
+    }
+
+    async createMeeting(payload: any): Promise<any> {
+        this.applyPortalToken();
+        const response = await brokerClient.post(API_CONFIG.BROKER_PORTAL.MEETINGS, payload);
+        return response.data;
+    }
+
+    async updateMeeting(id: number, payload: any): Promise<any> {
+        this.applyPortalToken();
+        const url = API_CONFIG.BROKER_PORTAL.MEETING_DETAIL.replace(':id', id.toString());
+        const response = await brokerClient.patch(url, payload);
+        return response.data;
     }
 }
 

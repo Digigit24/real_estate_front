@@ -234,7 +234,6 @@ const LeadDetailsForm = forwardRef<LeadFormHandle, LeadDetailsFormProps>(
         value_amount: lead?.value_amount || '',
         value_currency: lead?.value_currency || getCurrencyCode(),
         source: lead?.source || '',
-        owner_user_id: lead?.owner_user_id || user?.id || '',
         assigned_to: lead?.assigned_to || '',
         last_contacted_at: lead?.last_contacted_at || '',
         next_follow_up_at: lead?.next_follow_up_at || '',

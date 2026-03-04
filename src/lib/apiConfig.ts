@@ -544,14 +544,14 @@ export const API_CONFIG = {
       UPDATE: '/integrations/workflows/:id/',
       DELETE: '/integrations/workflows/:id/',
       TEST: '/integrations/workflows/:id/test/',
-      TOGGLE_ACTIVE: '/integrations/workflows/:id/toggle_active/',
+      TOGGLE: '/integrations/workflows/:id/toggle/',
       STATISTICS: '/integrations/workflows/:id/statistics/',
       TRIGGERS: '/integrations/workflows/:workflow_id/triggers/',
       TRIGGER_DETAIL: '/integrations/workflows/:workflow_id/triggers/:id/',
       ACTIONS: '/integrations/workflows/:workflow_id/actions/',
       ACTION_DETAIL: '/integrations/workflows/:workflow_id/actions/:id/',
-      MAPPINGS: '/integrations/workflows/:workflow_id/mappings/',
-      MAPPING_DETAIL: '/integrations/workflows/:workflow_id/mappings/:id/',
+      MAPPINGS: '/integrations/workflows/:workflow_id/actions/:action_id/mappings/',
+      MAPPING_DETAIL: '/integrations/workflows/:workflow_id/actions/:action_id/mappings/:id/',
       EXECUTION_LOGS: '/integrations/workflows/:workflow_id/execution-logs/',
       EXECUTION_LOG_DETAIL: '/integrations/workflows/:workflow_id/execution-logs/:id/',
     },
@@ -686,6 +686,14 @@ export const API_CONFIG = {
     BOOKING_RECEIPT: '/bookings/:id/milestones/:mid/receipt-data/',
     BOOKING_SUMMARY: '/bookings/summary/',
     BOOKING_UPCOMING_PAYMENTS: '/bookings/upcoming-payments/',
+
+    // Additional CRM features for Broker Portal
+    PAYMENTS: '/payments/',
+    PAYMENT_DETAIL: '/payments/:id/',
+    TASKS: '/tasks/',
+    TASK_DETAIL: '/tasks/:id/',
+    MEETINGS: '/meetings/',
+    MEETING_DETAIL: '/meetings/:id/',
   },
 
   // ==================== ANALYTICS ====================

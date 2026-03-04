@@ -261,8 +261,8 @@ export const useIntegrations = () => {
   /**
    * Toggle workflow active status
    */
-  const toggleWorkflowActive = async (id: number): Promise<Workflow> => {
-    return integrationService.toggleWorkflowActive(id);
+  const toggleWorkflow = async (id: number): Promise<Workflow> => {
+    return integrationService.toggleWorkflow(id);
   };
 
   /**
@@ -373,11 +373,11 @@ export const useIntegrations = () => {
   /**
    * Fetch mappings for a workflow
    */
-  const useWorkflowMappings = (workflowId?: number) => {
-    const key = workflowId ? [WORKFLOW_MAPPINGS_KEY, workflowId] : null;
+  const useWorkflowMappings = (workflowId?: number, actionId?: number) => {
+    const key = workflowId && actionId ? [WORKFLOW_MAPPINGS_KEY, workflowId, actionId] : null;
     return useSWR<WorkflowMapping[]>(
       key,
-      () => (workflowId ? integrationService.getWorkflowMappings(workflowId) : Promise.reject('No workflow ID provided')),
+      () => (workflowId && actionId ? integrationService.getWorkflowMappings(workflowId, actionId) : Promise.reject('No workflow ID or action ID provided')),
       {
         revalidateOnFocus: false,
       }
@@ -389,9 +389,10 @@ export const useIntegrations = () => {
    */
   const createWorkflowMapping = async (
     workflowId: number,
+    actionId: number,
     data: Omit<WorkflowMappingCreateData, 'workflow'>
   ): Promise<WorkflowMapping> => {
-    return integrationService.createWorkflowMapping(workflowId, data);
+    return integrationService.createWorkflowMapping(workflowId, actionId, data);
   };
 
   /**
@@ -399,17 +400,18 @@ export const useIntegrations = () => {
    */
   const updateWorkflowMapping = async (
     workflowId: number,
+    actionId: number,
     mappingId: number,
     data: WorkflowMappingUpdateData
   ): Promise<WorkflowMapping> => {
-    return integrationService.updateWorkflowMapping(workflowId, mappingId, data);
+    return integrationService.updateWorkflowMapping(workflowId, actionId, mappingId, data);
   };
 
   /**
    * Delete workflow mapping
    */
-  const deleteWorkflowMapping = async (workflowId: number, mappingId: number): Promise<void> => {
-    return integrationService.deleteWorkflowMapping(workflowId, mappingId);
+  const deleteWorkflowMapping = async (workflowId: number, actionId: number, mappingId: number): Promise<void> => {
+    return integrationService.deleteWorkflowMapping(workflowId, actionId, mappingId);
   };
 
   // ==================== EXECUTION LOGS ====================
@@ -476,7 +478,7 @@ export const useIntegrations = () => {
     updateWorkflow,
     deleteWorkflow,
     testWorkflow,
-    toggleWorkflowActive,
+    toggleWorkflow,
     useWorkflowStatistics,
 
     // Workflow Triggers
