@@ -1,26 +1,29 @@
 // src/hooks/useAuth.ts
-import { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import useSWR, { mutate } from 'swr';
 import { authService } from '@/services/authService';
 import { LoginPayload, User } from '@/types/authTypes';
+import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useSWR, { mutate } from 'swr';
 
 export const useAuth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get user from localStorage initially
-  const [user, setUser] = useState<User | null>(() => authService.getCurrentUser());
+  // Use SWR for global user state
+  const { data: user, mutate: setUser } = useSWR<User | null>(
+    'auth-user',
+    () => authService.getCurrentUser(),
+    {
+      fallbackData: authService.getCurrentUser(),
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      refreshInterval: 0,
+    }
+  );
 
   // Check authentication status
-  const isAuthenticated = authService.isAuthenticated();
-
-  // Update user state when auth service user changes
-  useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-  }, [isAuthenticated]);
+  const isAuthenticated = !!user && authService.isAuthenticated();
 
   // Login function
   const login = useCallback(async (payload: LoginPayload) => {
@@ -30,11 +33,11 @@ export const useAuth = () => {
     try {
       const loggedInUser = await authService.login(payload);
       
-      // Update local state
-      setUser(loggedInUser);
+      // Update local state (shared via SWR)
+      await setUser(loggedInUser, { revalidate: false });
       
-      // Clear any existing SWR cache to ensure fresh data
-      mutate(() => true, undefined, { revalidate: false });
+      // Clear other cached data but keep auth user
+      mutate((key) => key !== 'auth-user', undefined, { revalidate: false });
       
       // Navigate to dashboard
       navigate('/', { replace: true });
@@ -56,11 +59,11 @@ export const useAuth = () => {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
-      // Update local state
-      setUser(null);
+      // Clear all other SWR cache first
+      mutate((key) => key !== 'auth-user', undefined, { revalidate: false });
       
-      // Clear all SWR cache
-      mutate(() => true, undefined, { revalidate: false });
+      // Update local state (shared via SWR) to null
+      await setUser(null, { revalidate: false });
       
       // Navigate to login
       navigate('/login', { replace: true });
@@ -77,7 +80,7 @@ export const useAuth = () => {
       console.error('Failed to refresh user:', err);
       return null;
     }
-  }, []);
+  }, [setUser]);
 
   // Check if user has access to a specific module
   const hasModuleAccess = useCallback((module: string) => {

@@ -1,12 +1,7 @@
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { LeadSelect } from '@/components/LeadSelect';
 import { SideDrawer } from '@/components/SideDrawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -14,8 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { UnitSelect } from '@/components/UnitSelect';
 import type { Booking, CreateBookingPayload } from '@/types/bookingTypes';
 import { PAYMENT_PLAN_OPTIONS } from '@/types/bookingTypes';
+import { UnitStatusEnum } from '@/types/inventoryTypes';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const PAYMENT_PLAN_LABELS: Record<string, string> = {
   '20_80': '20:80 Plan',
@@ -24,8 +27,8 @@ const PAYMENT_PLAN_LABELS: Record<string, string> = {
 };
 
 const bookingSchema = z.object({
-  lead: z.coerce.number().min(1, 'Lead ID is required'),
-  unit: z.coerce.number().min(1, 'Unit ID is required'),
+  lead: z.coerce.number().min(1, 'Lead is required'),
+  unit: z.coerce.number().min(1, 'Unit is required'),
   booking_date: z.string().min(1, 'Booking date is required'),
   token_amount: z.string().min(1, 'Token amount is required'),
   total_amount: z.string().min(1, 'Total amount is required'),
@@ -73,6 +76,8 @@ export function BookingFormDrawer({
   });
 
   const paymentPlanType = watch('payment_plan_type');
+  const leadValue = watch('lead');
+  const unitValue = watch('unit');
 
   useEffect(() => {
     if (booking) {
@@ -137,31 +142,29 @@ export function BookingFormDrawer({
         <div className="space-y-4">
           <h4 className="text-sm font-medium text-muted-foreground">Booking Information</h4>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="lead">Lead ID *</Label>
-              <Input
-                id="lead"
-                type="number"
-                {...register('lead')}
-                placeholder="e.g. 101"
-              />
-              {errors.lead && (
-                <p className="text-xs text-destructive">{errors.lead.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="unit">Unit ID *</Label>
-              <Input
-                id="unit"
-                type="number"
-                {...register('unit')}
-                placeholder="e.g. 205"
-              />
-              {errors.unit && (
-                <p className="text-xs text-destructive">{errors.unit.message}</p>
-              )}
-            </div>
+          {/* Lead — searchable dropdown */}
+          <div className="space-y-2">
+            <Label>Lead *</Label>
+            <LeadSelect
+              value={leadValue ? leadValue.toString() : ''}
+              onChange={(leadId) => setValue('lead', leadId ? parseInt(leadId) : 0, { shouldValidate: true })}
+            />
+            {errors.lead && (
+              <p className="text-xs text-destructive">{errors.lead.message}</p>
+            )}
+          </div>
+
+          {/* Unit — searchable dropdown (only AVAILABLE & RESERVED units) */}
+          <div className="space-y-2">
+            <Label>Unit *</Label>
+            <UnitSelect
+              value={unitValue ? unitValue.toString() : ''}
+              onChange={(unitId) => setValue('unit', unitId ? parseInt(unitId) : 0, { shouldValidate: true })}
+              statusFilter={[UnitStatusEnum.AVAILABLE, UnitStatusEnum.RESERVED]}
+            />
+            {errors.unit && (
+              <p className="text-xs text-destructive">{errors.unit.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">

@@ -1,88 +1,89 @@
 // src/App.tsx - CRM + WhatsApp Application
-import { useState, useEffect } from "react";
-import { SWRConfig } from "swr";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { UniversalSidebar } from "@/components/UniversalSidebar";
-import { UniversalHeader } from "@/components/UniversalHeader";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ModuleProtectedRoute } from "@/components/ModuleProtectedRoute";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { UniversalHeader } from "@/components/UniversalHeader";
+import { UniversalSidebar } from "@/components/UniversalSidebar";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { swrConfig } from "@/lib/swrConfig";
 import { authService } from "@/services/authService";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
-import { CRMLeads } from "./pages/CRMLeads";
-import { CRMActivities } from "./pages/CRMActivities";
-import { CRMLeadStatuses } from "./pages/CRMLeadStatuses";
-import { CRMFieldConfigurations } from "./pages/CRMFieldConfigurations";
-import { CRMTasks } from "./pages/CRMTasks";
-import { Meetings } from "./pages/Meetings";
-import { LeadDetailsPage } from "./pages/LeadDetailsPage";
-import Contacts from "./pages/Contacts";
-import Chats from "./pages/Chats";
-import Groups from "./pages/Groups";
-import Templates from "./pages/Templates";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { SWRConfig } from "swr";
 import Campaigns from "./pages/Campaigns";
-import Flows from "./pages/Flows";
+import Chats from "./pages/Chats";
+import Contacts from "./pages/Contacts";
+import { CRMActivities } from "./pages/CRMActivities";
+import { CRMFieldConfigurations } from "./pages/CRMFieldConfigurations";
+import { CRMLeads } from "./pages/CRMLeads";
+import { CRMLeadStatuses } from "./pages/CRMLeadStatuses";
+import { CRMTasks } from "./pages/CRMTasks";
+import Dashboard from "./pages/Dashboard";
 import FlowEditor from "./pages/FlowEditor";
+import Flows from "./pages/Flows";
+import Groups from "./pages/Groups";
+import { LeadDetailsPage } from "./pages/LeadDetailsPage";
+import Login from "./pages/Login";
+import { Meetings } from "./pages/Meetings";
+import NotFound from "./pages/NotFound";
 import QRCodes from "./pages/QRCodes";
-import WhatsAppOnboarding from "./pages/WhatsAppOnboarding";
 import Scheduling from "./pages/Scheduling";
+import Templates from "./pages/Templates";
+import WhatsAppOnboarding from "./pages/WhatsAppOnboarding";
 
 import { ThemeSync } from "@/components/ThemeSync";
-import { Users } from "./pages/Users";
-import { Roles } from "./pages/Roles";
-import { Debug } from "./pages/Debug";
 import { AdminSettings } from "./pages/AdminSettings";
+import { Debug } from "./pages/Debug";
 import Integrations from "./pages/Integrations";
+import { Roles } from "./pages/Roles";
+import { Users } from "./pages/Users";
 import WorkflowEditor from "./pages/WorkflowEditor";
 import { WorkflowLogs } from "./pages/WorkflowLogs";
 
 // Real Estate Inventory
-import { Projects } from "./pages/Projects";
-import { ProjectDetail } from "./pages/ProjectDetail";
-import { TowerUnitGrid } from "./pages/TowerUnitGrid";
-import { TenantSettingsPage } from "./pages/TenantSettingsPage";
 import { useFirstLogin } from "./hooks/useFirstLogin";
+import { ProjectDetail } from "./pages/ProjectDetail";
+import { Projects } from "./pages/Projects";
+import { TenantSettingsPage } from "./pages/TenantSettingsPage";
+import { TowerUnitGrid } from "./pages/TowerUnitGrid";
 
 // Bookings & Payments
-import { Bookings } from "./pages/Bookings";
 import { BookingDetail } from "./pages/BookingDetail";
+import { Bookings } from "./pages/Bookings";
+import { PaymentsPage } from "./pages/Payments";
 
 // Brokers
+import { BrokerDetail } from "./pages/BrokerDetail";
 import { Brokers } from "./pages/Brokers";
 import { Commissions } from "./pages/Commissions";
 
 // Broker Portal
-import { BrokerLogin } from "./pages/broker-portal/BrokerLogin";
-import { BrokerRegistration } from "./pages/broker-portal/BrokerRegistration";
-import { BrokerDashboard } from "./pages/broker-portal/BrokerDashboard";
-import { BrokerSubmitLead } from "./pages/broker-portal/BrokerSubmitLead";
-import { BrokerMyLeads } from "./pages/broker-portal/BrokerMyLeads";
-import { BrokerProfile } from "./pages/broker-portal/BrokerProfile";
-import { BrokerStatuses } from "./pages/broker-portal/BrokerStatuses";
-import { BrokerActivities } from "./pages/broker-portal/BrokerActivities";
-import { BrokerFieldConfigs } from "./pages/broker-portal/BrokerFieldConfigs";
-import { BrokerInventory } from "./pages/broker-portal/BrokerInventory";
-import { BrokerUnits } from "./pages/broker-portal/BrokerUnits";
-import { BrokerBookings } from "./pages/broker-portal/BrokerBookings";
-import { BrokerNetwork } from "./pages/broker-portal/BrokerNetwork";
+// import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
+// import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
 import { BrokerPortalLayout } from "./components/broker-portal/BrokerPortalLayout";
 import { BrokerPortalProtectedRoute } from "./components/broker-portal/BrokerPortalProtectedRoute";
-import { BrokerTasks } from "./pages/broker-portal/BrokerTasks";
-import { BrokerMeetings } from "./pages/broker-portal/BrokerMeetings";
-import { BrokerPayments } from "./pages/broker-portal/BrokerPayments";
+import { BrokerActivities } from "./pages/broker-portal/BrokerActivities";
+import { BrokerBookings } from "./pages/broker-portal/BrokerBookings";
+import { BrokerDashboard } from "./pages/broker-portal/BrokerDashboard";
+import { BrokerFieldConfigs } from "./pages/broker-portal/BrokerFieldConfigs";
+import { BrokerInventory } from "./pages/broker-portal/BrokerInventory";
+import { BrokerLogin } from "./pages/broker-portal/BrokerLogin";
+import { BrokerMyLeads } from "./pages/broker-portal/BrokerMyLeads";
+import { BrokerProfile } from "./pages/broker-portal/BrokerProfile";
+import { BrokerRegistration } from "./pages/broker-portal/BrokerRegistration";
+import { BrokerStatuses } from "./pages/broker-portal/BrokerStatuses";
+import { BrokerSubmitLead } from "./pages/broker-portal/BrokerSubmitLead";
+import { BrokerUnits } from "./pages/broker-portal/BrokerUnits";
 
 // Analytics
 import { Analytics } from "./pages/Analytics";
 
-import { WebSocketProvider } from "./context/WebSocketProvider";
 import { RealtimeChatProvider } from "./context/RealtimeChatProvider";
+import { WebSocketProvider } from "./context/WebSocketProvider";
+import { useAuth } from "./hooks/useAuth";
 import { OAuthCallback } from "./pages/OAuthCallback";
 
 const queryClient = new QueryClient({
@@ -141,7 +142,11 @@ const AppLayout = () => {
 
               {/* Brokers Routes */}
               <Route path="/brokers" element={<ModuleProtectedRoute requiredModule="crm"><Brokers /></ModuleProtectedRoute>} />
+              <Route path="/brokers/:id" element={<ModuleProtectedRoute requiredModule="crm"><BrokerDetail /></ModuleProtectedRoute>} />
               <Route path="/brokers/commissions" element={<ModuleProtectedRoute requiredModule="crm"><Commissions /></ModuleProtectedRoute>} />
+
+              {/* Payments Route */}
+              <Route path="/payments" element={<ModuleProtectedRoute requiredModule="crm"><PaymentsPage /></ModuleProtectedRoute>} />
 
               {/* Analytics Route */}
               <Route path="/analytics" element={<ModuleProtectedRoute requiredModule="crm"><Analytics /></ModuleProtectedRoute>} />
@@ -185,7 +190,7 @@ const AppLayout = () => {
 };
 
 const App = () => {
-  const isAuthenticated = authService.isAuthenticated();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -200,56 +205,50 @@ const App = () => {
           <Toaster />
           <Sonner />
           <WebSocketProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route
-                  path="/login"
-                  element={
-                    isAuthenticated ? <Navigate to="/" replace /> : <Login />
-                  }
-                />
+            <Routes>
+              <Route
+                path="/login"
+                element={
+                  isAuthenticated ? <Navigate to="/" replace /> : <Login />
+                }
+              />
 
-                {/* Broker Portal Auth Routes */}
-                <Route path="/broker-portal/login" element={<BrokerLogin />} />
-                <Route path="/broker-portal/register" element={<BrokerRegistration />} />
+              {/* Broker Portal Auth Routes */}
+              <Route path="/broker-portal/login" element={<BrokerLogin />} />
+              <Route path="/broker-portal/register" element={<BrokerRegistration />} />
 
-                {/* Broker Portal Protected Routes */}
-                <Route
-                  path="/broker-portal"
-                  element={
-                    <BrokerPortalProtectedRoute>
-                      <BrokerPortalLayout />
-                    </BrokerPortalProtectedRoute>
-                  }
-                >
-                  <Route index element={<BrokerDashboard />} />
-                  <Route path="my-leads" element={<BrokerMyLeads />} />
-                  <Route path="submit-lead" element={<BrokerSubmitLead />} />
-                  <Route path="statuses" element={<BrokerStatuses />} />
-                  <Route path="activities" element={<BrokerActivities />} />
-                  <Route path="field-configs" element={<BrokerFieldConfigs />} />
-                  <Route path="inventory" element={<BrokerInventory />} />
-                  <Route path="inventory/units" element={<BrokerUnits />} />
-                  <Route path="bookings" element={<BrokerBookings />} />
-                  <Route path="payments" element={<BrokerPayments />} />
-                  <Route path="network" element={<BrokerNetwork />} />
-                  <Route path="me" element={<BrokerProfile />} />
-                  <Route path="tasks" element={<BrokerTasks />} />
-                  <Route path="meetings" element={<BrokerMeetings />} />
-                </Route>
+              {/* Broker Portal Protected Routes */}
+              <Route
+                path="/broker-portal"
+                element={
+                  <BrokerPortalProtectedRoute>
+                    <BrokerPortalLayout />
+                  </BrokerPortalProtectedRoute>
+                }
+              >
+                <Route index element={<BrokerDashboard />} />
+                <Route path="my-leads" element={<BrokerMyLeads />} />
+                <Route path="submit-lead" element={<BrokerSubmitLead />} />
+                <Route path="statuses" element={<BrokerStatuses />} />
+                <Route path="activities" element={<BrokerActivities />} />
+                <Route path="field-configs" element={<BrokerFieldConfigs />} />
+                <Route path="inventory" element={<BrokerInventory />} />
+                <Route path="inventory/units" element={<BrokerUnits />} />
+                <Route path="bookings" element={<BrokerBookings />} />
+                <Route path="me" element={<BrokerProfile />} />
+              </Route>
 
-                <Route
-                  path="/*"
-                  element={
-                    <ProtectedRoute>
-                      <RealtimeChatProvider>
-                        <AppLayout />
-                      </RealtimeChatProvider>
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </BrowserRouter>
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <RealtimeChatProvider>
+                      <AppLayout />
+                    </RealtimeChatProvider>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
           </WebSocketProvider>
         </TooltipProvider>
       </QueryClientProvider>
