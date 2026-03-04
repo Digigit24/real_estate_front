@@ -56,7 +56,7 @@ export const UniversalHeader = ({ onMenuClick }: UniversalHeaderProps) => {
     if (exactMatch) return exactMatch;
     const dynamicMatch = getDynamicTitle(location.pathname);
     if (dynamicMatch) return dynamicMatch;
-    return "HMS";
+    return "";
   };
 
   const pageTitle = getPageTitle();
@@ -99,9 +99,9 @@ export const UniversalHeader = ({ onMenuClick }: UniversalHeaderProps) => {
         {/* WebSocket Status */}
         <div className="flex items-center gap-1.5 px-2" title={`WebSocket: ${socketStatus}`}>
           <div className={`h-1.5 w-1.5 rounded-full ${socketStatus === 'open' ? 'bg-emerald-500' :
-              socketStatus === 'connecting' ? 'bg-amber-500 animate-pulse' :
-                socketStatus === 'error' ? 'bg-red-500' :
-                  'bg-gray-300'
+            socketStatus === 'connecting' ? 'bg-amber-500 animate-pulse' :
+              socketStatus === 'error' ? 'bg-red-500' :
+                'bg-gray-300'
             }`} />
           <span className="text-[11px] text-muted-foreground hidden md:inline">
             {socketStatus === 'open' ? 'Live' :

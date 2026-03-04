@@ -1,7 +1,12 @@
-import { useState, useCallback } from 'react';
-import { usePayments } from '@/hooks/usePayments';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -11,24 +16,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { usePayments } from '@/hooks/usePayments';
+import type { CreatePaymentPayload } from '@/types/paymentTypes';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Loader2, Plus, IndianRupee, Calendar } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import { toast } from 'sonner';
-import {
-  PaymentTypeEnum,
-  PaymentStatusEnum,
   PAYMENT_STATUS_COLORS,
   PAYMENT_STATUS_LABELS,
   PAYMENT_TYPE_LABELS,
+  PaymentStatusEnum,
+  PaymentTypeEnum,
 } from '@/types/paymentTypes';
-import type { CreatePaymentPayload } from '@/types/paymentTypes';
+import { format, parseISO } from 'date-fns';
+import { Calendar, IndianRupee, Loader2, Plus } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 
 interface LeadPaymentsProps {
   leadId: number;
@@ -53,7 +53,7 @@ export const LeadPayments: React.FC<LeadPaymentsProps> = ({ leadId }) => {
     status: PaymentStatusEnum.PENDING,
     reference_no: '',
     notes: '',
-    payment_date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split('T')[0],
   });
 
   const handleOpenDialog = useCallback(() => {
@@ -64,7 +64,7 @@ export const LeadPayments: React.FC<LeadPaymentsProps> = ({ leadId }) => {
       status: PaymentStatusEnum.PENDING,
       reference_no: '',
       notes: '',
-      payment_date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split('T')[0],
     });
     setDialogOpen(true);
   }, [leadId]);
@@ -253,15 +253,15 @@ export const LeadPayments: React.FC<LeadPaymentsProps> = ({ leadId }) => {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="payment_date">Date</Label>
+              <Label htmlFor="date">Date</Label>
               <Input
-                id="payment_date"
+                id="date"
                 type="date"
-                value={formData.payment_date || ''}
+                value={formData.date || ''}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    payment_date: e.target.value,
+                    date: e.target.value,
                   }))
                 }
               />

@@ -106,7 +106,7 @@ export function PaymentFormDrawer({
             ...(formData.lead && { lead: parseInt(formData.lead) }),
             ...(formData.booking && { booking: parseInt(formData.booking) }),
             ...(formData.reference_no && { reference_no: formData.reference_no.trim() }),
-            ...(formData.payment_date && { payment_date: formData.payment_date }),
+            ...(formData.payment_date && { date: formData.payment_date }),
             ...(formData.notes && { notes: formData.notes.trim() }),
         };
 
