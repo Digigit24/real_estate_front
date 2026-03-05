@@ -9,6 +9,7 @@ import {
     CommissionsQueryParams,
     CommissionsResponse,
     CreateBrokerPayload,
+    CreateCommissionPayload,
     UpdateBrokerPayload,
     UpdateCommissionPayload,
 } from '@/types/brokerTypes';
@@ -89,6 +90,17 @@ export const useBrokers = () => {
     );
   };
 
+  const useCommissionDetail = (id: number | null) => {
+    return useSWR<Commission>(
+      id ? ['commission-detail', id] : null,
+      () => brokerService.getCommission(id!),
+      {
+        revalidateOnFocus: false,
+        onError: (err) => setError(err.message),
+      }
+    );
+  };
+
   // ==================== BROKER MUTATIONS ====================
 
   const createBroker = useCallback(async (payload: CreateBrokerPayload): Promise<Broker> => {
@@ -132,6 +144,20 @@ export const useBrokers = () => {
     }
   }, []);
 
+  const createCommission = useCallback(async (payload: CreateCommissionPayload): Promise<Commission> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await brokerService.createCommission(payload);
+      return result;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const updateCommission = useCallback(async (id: number, payload: UpdateCommissionPayload): Promise<Commission> => {
     setIsLoading(true);
     setError(null);
@@ -146,11 +172,24 @@ export const useBrokers = () => {
     }
   }, []);
 
-  const markCommissionPaid = useCallback(async (id: number): Promise<Commission> => {
+  const deleteCommission = useCallback(async (id: number): Promise<void> => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await brokerService.markCommissionPaid(id);
+      await brokerService.deleteCommission(id);
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const markCommissionPaid = useCallback(async (id: number, paidDate: string): Promise<Commission> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await brokerService.markCommissionPaid(id, paidDate);
       return result;
     } catch (err: any) {
       setError(err.message);
@@ -170,11 +209,14 @@ export const useBrokers = () => {
     useCommissionsList,
     useBrokerLeads,
     useBrokerCommissions,
+    useCommissionDetail,
     // Mutations
     createBroker,
     updateBroker,
     deleteBroker,
+    createCommission,
     updateCommission,
+    deleteCommission,
     markCommissionPaid,
   };
 };

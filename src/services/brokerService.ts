@@ -1,17 +1,18 @@
 // src/services/brokerService.ts
-import { crmClient } from '@/lib/client';
 import { API_CONFIG, buildQueryString } from '@/lib/apiConfig';
+import { crmClient } from '@/lib/client';
 import {
-  Broker,
-  BrokersResponse,
-  Commission,
-  CommissionsResponse,
-  BrokerLeaderboardResponse,
-  BrokersQueryParams,
-  CommissionsQueryParams,
-  CreateBrokerPayload,
-  UpdateBrokerPayload,
-  UpdateCommissionPayload,
+    Broker,
+    BrokerLeaderboardResponse,
+    BrokersQueryParams,
+    BrokersResponse,
+    Commission,
+    CommissionsQueryParams,
+    CommissionsResponse,
+    CreateBrokerPayload,
+    CreateCommissionPayload,
+    UpdateBrokerPayload,
+    UpdateCommissionPayload,
 } from '@/types/brokerTypes';
 
 class BrokerService {
@@ -19,7 +20,7 @@ class BrokerService {
 
   async getBrokers(params?: BrokersQueryParams): Promise<BrokersResponse> {
     try {
-      const queryString = buildQueryString(params);
+      const queryString = buildQueryString(params as Record<string, any>);
       const response = await crmClient.get<BrokersResponse>(
         `${API_CONFIG.BROKERS.LIST}${queryString}`
       );
@@ -119,13 +120,38 @@ class BrokerService {
 
   async getCommissions(params?: CommissionsQueryParams): Promise<CommissionsResponse> {
     try {
-      const queryString = buildQueryString(params);
+      const queryString = buildQueryString(params as Record<string, any>);
       const response = await crmClient.get<CommissionsResponse>(
         `${API_CONFIG.BROKERS.COMMISSIONS}${queryString}`
       );
       return response.data;
     } catch (error: any) {
       const message = error.response?.data?.error || 'Failed to fetch commissions';
+      throw new Error(message);
+    }
+  }
+
+  async getCommission(id: number): Promise<Commission> {
+    try {
+      const response = await crmClient.get<Commission>(
+        API_CONFIG.BROKERS.COMMISSION_DETAIL.replace(':id', id.toString())
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.error || 'Failed to fetch commission detail';
+      throw new Error(message);
+    }
+  }
+
+  async createCommission(payload: CreateCommissionPayload): Promise<Commission> {
+    try {
+      const response = await crmClient.post<Commission>(
+        API_CONFIG.BROKERS.COMMISSIONS,
+        payload
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = error.response?.data?.error || 'Failed to create commission';
       throw new Error(message);
     }
   }
@@ -143,10 +169,22 @@ class BrokerService {
     }
   }
 
-  async markCommissionPaid(id: number): Promise<Commission> {
+  async deleteCommission(id: number): Promise<void> {
+    try {
+      await crmClient.delete(
+        API_CONFIG.BROKERS.COMMISSION_DETAIL.replace(':id', id.toString())
+      );
+    } catch (error: any) {
+      const message = error.response?.data?.error || 'Failed to delete commission';
+      throw new Error(message);
+    }
+  }
+
+  async markCommissionPaid(id: number, paidDate: string): Promise<Commission> {
     try {
       const response = await crmClient.post<Commission>(
-        API_CONFIG.BROKERS.COMMISSION_MARK_PAID.replace(':id', id.toString())
+        API_CONFIG.BROKERS.COMMISSION_MARK_PAID.replace(':id', id.toString()),
+        { paid_date: paidDate }
       );
       return response.data;
     } catch (error: any) {

@@ -58,6 +58,7 @@ import { PaymentsPage } from "./pages/Payments";
 // Brokers
 import { BrokerDetail } from "./pages/BrokerDetail";
 import { Brokers } from "./pages/Brokers";
+import { CommissionDetail } from "./pages/CommissionDetail";
 import { Commissions } from "./pages/Commissions";
 
 // Broker Portal
@@ -142,8 +143,9 @@ const AppLayout = () => {
 
               {/* Brokers Routes */}
               <Route path="/brokers" element={<ModuleProtectedRoute requiredModule="crm"><Brokers /></ModuleProtectedRoute>} />
-              <Route path="/brokers/:id" element={<ModuleProtectedRoute requiredModule="crm"><BrokerDetail /></ModuleProtectedRoute>} />
               <Route path="/brokers/commissions" element={<ModuleProtectedRoute requiredModule="crm"><Commissions /></ModuleProtectedRoute>} />
+              <Route path="/brokers/commissions/:id" element={<ModuleProtectedRoute requiredModule="crm"><CommissionDetail /></ModuleProtectedRoute>} />
+              <Route path="/brokers/:id" element={<ModuleProtectedRoute requiredModule="crm"><BrokerDetail /></ModuleProtectedRoute>} />
 
               {/* Payments Route */}
               <Route path="/payments" element={<ModuleProtectedRoute requiredModule="crm"><PaymentsPage /></ModuleProtectedRoute>} />

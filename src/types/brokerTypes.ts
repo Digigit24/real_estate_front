@@ -35,6 +35,12 @@ export const COMMISSION_STATUS_COLORS: Record<CommissionStatusEnum, string> = {
   [CommissionStatusEnum.CANCELLED]: '#EF4444',
 };
 
+export const COMMISSION_STATUS_LABELS: Record<CommissionStatusEnum, string> = {
+  [CommissionStatusEnum.PENDING]: 'Pending',
+  [CommissionStatusEnum.PAID]: 'Paid',
+  [CommissionStatusEnum.CANCELLED]: 'Cancelled',
+};
+
 // ==================== INTERFACES ====================
 
 export interface Broker {
@@ -55,15 +61,22 @@ export interface Commission {
   id: number;
   broker: number;
   broker_name?: string;
+  broker_phone?: string;
   booking: number;
-  booking_unit?: string;
+  booking_date?: string;
+  unit_number?: string;
+  project_name?: string;
+  lead_id?: number;
   lead_name?: string;
-  amount: string;
+  commission_rate: string;
+  commission_amount: string;
   status: CommissionStatusEnum;
   paid_date?: string;
   notes?: string;
+  owner_user_id?: string;
   created_at?: string;
   updated_at?: string;
+  amount?: string; // Adding amount to be backward compatible with existing UI if needed, though commission_amount is the new field
 }
 
 export interface BrokerLeaderboardEntry {
@@ -91,7 +104,21 @@ export interface CreateBrokerPayload {
 export type UpdateBrokerPayload = Partial<CreateBrokerPayload>;
 
 export interface UpdateCommissionPayload {
+  broker?: number;
+  booking?: number;
+  lead_id?: number;
+  commission_rate?: string;
+  commission_amount?: string;
   status?: CommissionStatusEnum;
+  notes?: string;
+}
+
+export interface CreateCommissionPayload {
+  broker: number;
+  booking: number;
+  lead_id: number;
+  commission_rate: string;
+  commission_amount: string;
   notes?: string;
 }
 
