@@ -25,6 +25,7 @@ import {
   Users
 } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Area,
   AreaChart,
@@ -55,6 +56,7 @@ const formatPercent = (value: number | undefined | null) => {
 };
 
 export function Analytics() {
+  const navigate = useNavigate();
   const [periodDays, setPeriodDays] = useState<number>(30);
   const { useOverview, useSalesFunnel, useRevenue, useAgentLeaderboard, useLeadSources, useInventoryAnalytics } = useAnalytics();
 
@@ -449,7 +451,11 @@ export function Analytics() {
                   </TableHeader>
                   <TableBody>
                     {inventoryByProject.map((project: any) => (
-                      <TableRow key={project.project_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 border-b dark:border-slate-800">
+                      <TableRow
+                        key={project.project_id}
+                        className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 border-b dark:border-slate-800 cursor-pointer"
+                        onClick={() => navigate(`/inventory/projects/${project.project_id}`)}
+                      >
                         <TableCell className="pl-6 font-semibold text-slate-800 dark:text-slate-200">{project.project_name}</TableCell>
                         <TableCell className="text-right font-bold text-slate-700 dark:text-slate-300">{project.total}</TableCell>
                         <TableCell className="text-right">

@@ -1,7 +1,7 @@
 // src/lib/swrConfig.ts
+import { AxiosError } from 'axios';
 import { SWRConfiguration } from 'swr';
 import { crmClient } from './client';
-import { AxiosError } from 'axios';
 
 // Generic fetcher for SWR using CRM client
 export const fetcher = async <T = any>(url: string): Promise<T> => {
@@ -68,6 +68,7 @@ export const deleteFetcher = async <T = any>(url: string): Promise<T> => {
 export const swrConfig: SWRConfiguration = {
   fetcher,
   revalidateOnFocus: false,
+  revalidateIfStale: false, // Prevents refetching when navigating back to a page
   revalidateOnReconnect: true,
   shouldRetryOnError: false,
   dedupingInterval: 2000,
