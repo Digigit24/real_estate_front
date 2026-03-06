@@ -1,9 +1,11 @@
 // src/pages/TenantSettingsPage.tsx
+import { PaymentPlanTemplates } from '@/components/settings/PaymentPlanTemplates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTenantSettings } from '@/hooks/useTenantSettings';
 import type { UpdateTenantSettingsPayload } from '@/types/tenantSettingsTypes';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,8 +14,6 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PaymentPlanTemplates } from '@/components/settings/PaymentPlanTemplates';
 
 const settingsSchema = z.object({
   company_name: z.string().optional(),
@@ -118,10 +118,10 @@ export function TenantSettingsPage() {
       </div>
 
       <Tabs defaultValue="brand" className="space-y-6">
-        <TabsList className="bg-slate-100/50 border border-slate-200/60 p-1">
-          <TabsTrigger value="brand" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Brand & Company</TabsTrigger>
-          <TabsTrigger value="pdf" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">PDF Output</TabsTrigger>
-          <TabsTrigger value="payment-plans" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Payment Plans</TabsTrigger>
+        <TabsList className="bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 p-1">
+          <TabsTrigger value="brand" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-950 data-[state=active]:shadow-sm">Brand & Company</TabsTrigger>
+          <TabsTrigger value="pdf" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-950 data-[state=active]:shadow-sm">PDF Output</TabsTrigger>
+          <TabsTrigger value="payment-plans" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-950 data-[state=active]:shadow-sm">Payment Plans</TabsTrigger>
         </TabsList>
 
         <TabsContent value="brand" className="space-y-6">
