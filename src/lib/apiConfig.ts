@@ -13,12 +13,16 @@ export const API_CONFIG = {
   // IMPORTANT: For OAuth integrations (like Google Sheets), use 'localhost' instead of '127.0.0.1'
   // to match the redirect URIs configured in Google Cloud Console
   // AUTH_BASE_URL: import.meta.env.VITE_AUTH_BASE_URL || 'https://admin.celiyo.com/api',
-  AUTH_BASE_URL: import.meta.env.VITE_AUTH_BASE_URL || 'https://real-estate.celiyo.com/api',
+  // AUTH_BASE_URL: import.meta.env.VITE_AUTH_BASE_URL || 'https://real-estate.celiyo.com/api',
+  // CRM_BASE_URL: import.meta.env.VITE_CRM_BASE_URL || 'https://crm.celiyo.com/api',
+  // HMS_BASE_URL: import.meta.env.VITE_HMS_BASE_URL || 'https://hms.celiyo.com/api',
+  // WHATSAPP_BASE_URL: import.meta.env.VITE_WHATSAPP_BASE_URL || 'https://whatsappapi.celiyo.com/api',
+
+ 
+   AUTH_BASE_URL: import.meta.env.VITE_AUTH_BASE_URL || 'https://real-estate.celiyo.com/api',
   CRM_BASE_URL: import.meta.env.VITE_CRM_BASE_URL || 'https://real-estate.celiyo.com/api',
   HMS_BASE_URL: import.meta.env.VITE_HMS_BASE_URL || 'https://hms.celiyo.com/api',
   WHATSAPP_BASE_URL: import.meta.env.VITE_WHATSAPP_BASE_URL || 'https://whatsappapi.celiyo.com/api',
-
-  // ESTATE_BASE_URL: import.meta.env.VITE_ESTATE_BASE_URL || 'https://real-estate.celiyo.com/api',
 
   // Laravel Main App URL (for web routes like templates that are in web.php, not api.php)
   // Templates are served from: /vendor-console/whatsapp/templates/

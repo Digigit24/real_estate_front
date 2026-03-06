@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { SideDrawer } from '@/components/SideDrawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Project, CreateProjectPayload } from '@/types/inventoryTypes';
+import { Textarea } from '@/components/ui/textarea';
+import { CreateProjectPayload, Project } from '@/types/inventoryTypes';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
@@ -106,6 +106,7 @@ export function ProjectFormDrawer({
   const onFormSubmit = async (data: ProjectFormData) => {
     const payload: CreateProjectPayload = {
       ...data,
+      name: data.name,
       google_maps_url: data.google_maps_url || undefined,
       logo_url: data.logo_url || undefined,
       banner_url: data.banner_url || undefined,

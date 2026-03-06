@@ -1,15 +1,13 @@
 // src/components/task-drawer/TaskBasicInfo.tsx
-import { forwardRef, useImperativeHandle, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { forwardRef, useEffect, useImperativeHandle } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -17,11 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
-import type { Task, CreateTaskPayload, UpdateTaskPayload, Lead, TaskStatusEnum, PriorityEnum } from '@/types/crmTypes';
-import { TASK_STATUS_OPTIONS, PRIORITY_OPTIONS } from '@/types/crmTypes';
-import { formatDistanceToNow, format } from 'date-fns';
 import { useUsers } from '@/hooks/useUsers';
+import type { CreateTaskPayload, Lead, PriorityEnum, Task, TaskStatusEnum, UpdateTaskPayload } from '@/types/crmTypes';
+import { PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from '@/types/crmTypes';
+import { format, formatDistanceToNow } from 'date-fns';
 
 // Validation schemas
 const createTaskSchema = z.object({
@@ -31,8 +30,8 @@ const createTaskSchema = z.object({
   status: z.string().optional(),
   priority: z.string().optional(),
   due_date: z.string().optional(),
-  assignee_user_id: z.string().optional(),
-  reporter_user_id: z.string().optional(),
+  assignee_user_id: z.coerce.string().optional(),
+  reporter_user_id: z.coerce.string().optional(),
 });
 
 const updateTaskSchema = z.object({
@@ -42,8 +41,8 @@ const updateTaskSchema = z.object({
   status: z.string().optional(),
   priority: z.string().optional(),
   due_date: z.string().optional(),
-  assignee_user_id: z.string().optional(),
-  reporter_user_id: z.string().optional(),
+  assignee_user_id: z.coerce.string().optional(),
+  reporter_user_id: z.coerce.string().optional(),
 });
 
 type TaskFormData = z.infer<typeof createTaskSchema> | z.infer<typeof updateTaskSchema>;
@@ -76,25 +75,25 @@ const TaskBasicInfo = forwardRef<TaskBasicInfoHandle, TaskBasicInfoProps>(
 
     const defaultValues = isCreateMode
       ? {
-          lead: undefined,
-          title: '',
-          description: '',
-          status: 'TODO',
-          priority: 'MEDIUM',
-          due_date: '',
-          assignee_user_id: '',
-          reporter_user_id: '',
-        }
+        lead: undefined,
+        title: '',
+        description: '',
+        status: 'TODO',
+        priority: 'MEDIUM',
+        due_date: '',
+        assignee_user_id: '',
+        reporter_user_id: '',
+      }
       : {
-          lead: task?.lead,
-          title: task?.title || '',
-          description: task?.description || '',
-          status: task?.status || 'TODO',
-          priority: task?.priority || 'MEDIUM',
-          due_date: task?.due_date ? task.due_date.split('T')[0] : '',
-          assignee_user_id: task?.assignee_user_id || '',
-          reporter_user_id: task?.reporter_user_id || '',
-        };
+        lead: task?.lead,
+        title: task?.title || '',
+        description: task?.description || '',
+        status: task?.status || 'TODO',
+        priority: task?.priority || 'MEDIUM',
+        due_date: task?.due_date ? task.due_date.split('T')[0] : '',
+        assignee_user_id: task?.assignee_user_id || '',
+        reporter_user_id: task?.reporter_user_id || '',
+      };
 
     const {
       register,

@@ -76,7 +76,7 @@ export interface CreatePaymentPayload {
   status?: PaymentStatusEnum;
   reference_no?: string;
   notes?: string;
-  payment_date?: string;
+  date?: string;
 }
 
 export interface UpdatePaymentPayload extends Partial<CreatePaymentPayload> {}

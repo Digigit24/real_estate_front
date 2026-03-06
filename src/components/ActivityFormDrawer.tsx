@@ -1,18 +1,7 @@
 // src/components/ActivityFormDrawer.tsx
-import { useState, useEffect, useMemo } from 'react';
-import { useCRM } from '@/hooks/useCRM';
-import { useAuth } from '@/hooks/useAuth';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -20,10 +9,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Clock } from 'lucide-react';
-import { toast } from 'sonner';
-import { format, parse, addMinutes } from 'date-fns';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/hooks/useAuth';
+import { useCRM } from '@/hooks/useCRM';
 import type { ActivityTypeEnum } from '@/types/crmTypes';
+import { addMinutes, format } from 'date-fns';
+import { Clock, Loader2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 interface ActivityFormDrawerProps {
   open: boolean;
@@ -152,7 +152,8 @@ export const ActivityFormDrawer: React.FC<ActivityFormDrawerProps> = ({
         type,
         content: content.trim(),
         happened_at: happenedAtDate.toISOString(),
-        meta,
+        by_user_id: user?.id ? String(user.id) : undefined,
+        meta: meta ? JSON.stringify(meta) : undefined,
       };
 
       await createLeadActivity(activityData);

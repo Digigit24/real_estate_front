@@ -1,8 +1,6 @@
-import { useState } from 'react';
-import { useAnalytics } from '@/hooks/useAnalytics';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
@@ -12,35 +10,35 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import {
-  BarChart3,
+  Activity,
+  ArrowUpRight,
   Building,
   DollarSign,
   Megaphone,
+  PieChart as PieChartIcon,
   RefreshCw,
   Target,
   TrendingUp,
   Trophy,
-  Users,
-  Activity,
-  PieChart as PieChartIcon,
-  ArrowUpRight
+  Users
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { useState } from 'react';
 import {
-  AreaChart,
   Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
+  AreaChart,
   Bar,
-  PieChart,
-  Pie,
+  BarChart,
+  CartesianGrid,
   Cell,
-  Legend
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
 
 const formatCurrency = (value: number) => {
@@ -96,65 +94,97 @@ export function Analytics() {
   // Colors for pie chart
   const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#0ea5e9'];
 
-  let inventoryData: any[] = [];
-  if (inventory) {
-    if (Array.isArray(inventory)) {
-      // If the backend returns an array of projects
-      inventoryData = inventory.map((p: any) => ({
-        name: p.project_name || `Project ${p.project_id}`,
-        Available: p.available,
-        Booked: p.booked + p.sold + p.reserved,
-        Total: p.total
-      }));
-    } else {
-      // Single global inventory object
-      inventoryData = [
-        { name: 'Available', value: inventory.available },
-        { name: 'Booked', value: inventory.booked },
-        { name: 'Sold', value: inventory.sold },
-        { name: 'Reserved', value: inventory.reserved },
-        { name: 'Blocked', value: inventory.blocked }
-      ].filter(item => item.value > 0);
-    }
-  }
+  // Inventory data from API: { overall: {...}, by_project: [{...}] }
+  const inventoryOverall = (inventory as any)?.overall || (inventory && !((inventory as any).by_project) ? inventory : null);
+  const inventoryByProject: any[] = (inventory as any)?.by_project || (Array.isArray(inventory) ? inventory : []);
 
-  const StatCard = ({ title, value, subtext, icon: Icon, color, loading }: any) => (
-    <Card className={`relative overflow-hidden bg-white/70 backdrop-blur-xl border border-${color}-100 shadow-sm hover:shadow-md transition-all`}>
-      <div className={`absolute top-0 right-0 w-32 h-32 bg-${color}-50/50 rounded-bl-[100px] -z-10`} />
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{title}</p>
-            {loading ? (
-              <div className="h-9 w-24 bg-slate-200 animate-pulse rounded mt-2"></div>
-            ) : (
-              <h3 className={`text-3xl font-black text-slate-800 mt-2`}>{value}</h3>
-            )}
-            <p className="text-xs font-medium text-slate-500 mt-2 flex items-center">
-              {subtext}
-            </p>
+  const inventoryPieData = inventoryOverall ? [
+    { name: 'Available', value: inventoryOverall.available },
+    { name: 'Booked', value: inventoryOverall.booked },
+    { name: 'Sold', value: inventoryOverall.sold },
+    { name: 'Reserved', value: inventoryOverall.reserved },
+    { name: 'Blocked', value: inventoryOverall.blocked },
+    { name: 'Registered', value: inventoryOverall.registered },
+  ].filter(item => item.value > 0) : [];
+
+  const inventoryBarData = inventoryByProject.map((p: any) => ({
+    name: p.project_name || `Project ${p.project_id}`,
+    Available: p.available,
+    Booked: p.booked,
+    Reserved: p.reserved,
+    Sold: p.sold,
+    Registered: p.registered,
+    Blocked: p.blocked,
+    Total: p.total,
+  }));
+
+  const colorMap: Record<string, any> = {
+    emerald: {
+      border: 'border-emerald-100 dark:border-emerald-900/30',
+      bgShape: 'bg-emerald-50/50 dark:bg-emerald-500/10',
+      bgIcon: 'bg-emerald-50 dark:bg-emerald-500/20',
+      textIcon: 'text-emerald-600 dark:text-emerald-400',
+    },
+    blue: {
+      border: 'border-blue-100 dark:border-blue-900/30',
+      bgShape: 'bg-blue-50/50 dark:bg-blue-500/10',
+      bgIcon: 'bg-blue-50 dark:bg-blue-500/20',
+      textIcon: 'text-blue-600 dark:text-blue-400',
+    },
+    purple: {
+      border: 'border-purple-100 dark:border-purple-900/30',
+      bgShape: 'bg-purple-50/50 dark:bg-purple-500/10',
+      bgIcon: 'bg-purple-50 dark:bg-purple-500/20',
+      textIcon: 'text-purple-600 dark:text-purple-400',
+    },
+    amber: {
+      border: 'border-amber-100 dark:border-amber-900/30',
+      bgShape: 'bg-amber-50/50 dark:bg-amber-500/10',
+      bgIcon: 'bg-amber-50 dark:bg-amber-500/20',
+      textIcon: 'text-amber-600 dark:text-amber-400',
+    }
+  };
+
+  const StatCard = ({ title, value, subtext, icon: Icon, color, loading }: any) => {
+    const styles = colorMap[color] || colorMap.blue;
+    return (
+      <Card className={`relative overflow-hidden bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border ${styles.border} shadow-sm hover:shadow-md transition-all`}>
+        <div className={`absolute top-0 right-0 w-32 h-32 ${styles.bgShape} rounded-bl-[100px] -z-10`} />
+        <CardContent className="p-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{title}</p>
+              {loading ? (
+                <div className="h-9 w-24 bg-slate-200 dark:bg-slate-800 animate-pulse rounded mt-2"></div>
+              ) : (
+                <h3 className={`text-3xl font-black text-slate-800 dark:text-slate-100 mt-2`}>{value}</h3>
+              )}
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 flex items-center">
+                {subtext}
+              </p>
+            </div>
+            <div className={`p-4 rounded-2xl ${styles.bgIcon} ${styles.textIcon}`}>
+              <Icon className="w-6 h-6" />
+            </div>
           </div>
-          <div className={`p-4 rounded-2xl bg-${color}-50 text-${color}-600`}>
-            <Icon className="w-6 h-6" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    )
+  };
 
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-[1600px] mx-auto animate-in fade-in zoom-in-95 duration-500">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-600 tracking-tight flex items-center gap-3">
-            <Activity className="w-8 h-8 text-indigo-600" /> Executive Analytics
+          <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-600 dark:from-indigo-400 dark:to-purple-400 tracking-tight flex items-center gap-3">
+            <Activity className="w-8 h-8 text-indigo-600 dark:text-indigo-400" /> Executive Analytics
           </h1>
           <p className="text-muted-foreground mt-1.5 font-medium">Real-time KPI metrics and conversion dashboards.</p>
         </div>
-        <div className="flex items-center gap-3 bg-white/50 p-2 rounded-xl backdrop-blur-sm border border-slate-200">
+        <div className="flex items-center gap-3 bg-white/50 dark:bg-slate-900/50 p-2 rounded-xl backdrop-blur-sm border border-slate-200 dark:border-slate-800">
           <Select value={String(periodDays)} onValueChange={(val) => setPeriodDays(Number(val))}>
-            <SelectTrigger className="w-[140px] border-none shadow-none focus:ring-0 font-medium text-indigo-900 bg-transparent">
+            <SelectTrigger className="w-[140px] border-none shadow-none focus:ring-0 font-medium text-indigo-900 dark:text-indigo-100 bg-transparent">
               <SelectValue placeholder="Period" />
             </SelectTrigger>
             <SelectContent>
@@ -164,8 +194,8 @@ export function Analytics() {
               <SelectItem value="365">Last 365 Days</SelectItem>
             </SelectContent>
           </Select>
-          <div className="w-px h-6 bg-slate-200"></div>
-          <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={isAnyLoading} className="text-indigo-600 hover:bg-indigo-50">
+          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700"></div>
+          <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={isAnyLoading} className="text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10">
             <RefreshCw className={`h-4 w-4 mr-2 ${isAnyLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
@@ -211,17 +241,17 @@ export function Analytics() {
       {/* Main Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Revenue Trend */}
-        <Card className="border border-slate-200/60 shadow-md rounded-2xl overflow-hidden bg-white">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <Card className="border border-slate-200/60 dark:border-slate-800 shadow-md rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-indigo-600" />
-              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Revenue Trend</h2>
+              <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Revenue Trend</h2>
             </div>
-            {revenue && <Badge variant="secondary" className="bg-indigo-50 text-indigo-700">{formatCurrency(revenue.total_value)} Total</Badge>}
+            {revenue && <Badge variant="secondary" className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400">{formatCurrency(revenue.total_value)} Total</Badge>}
           </div>
           <div className="p-6 h-[350px]">
             {revenueLoading ? (
-              <div className="w-full h-full flex items-center justify-center animate-pulse bg-slate-50/50 rounded-xl">Loading...</div>
+              <div className="w-full h-full flex items-center justify-center animate-pulse bg-slate-50/50 dark:bg-slate-800/50 rounded-xl">Loading...</div>
             ) : revenueChartData.length === 0 ? (
               <div className="w-full h-full flex items-center justify-center text-slate-400">No trend data available.</div>
             ) : (
@@ -248,17 +278,17 @@ export function Analytics() {
         </Card>
 
         {/* Sales Funnel */}
-        <Card className="border border-slate-200/60 shadow-md rounded-2xl overflow-hidden bg-white">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <Card className="border border-slate-200/60 dark:border-slate-800 shadow-md rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-purple-600" />
-              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Sales Funnel</h2>
+              <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Sales Funnel</h2>
             </div>
-            {funnel && <Badge variant="secondary" className="bg-purple-50 text-purple-700">{formatPercent(funnel.overall_conversion_rate)} Conversion</Badge>}
+            {funnel && <Badge variant="secondary" className="bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400">{formatPercent(funnel.overall_conversion_rate)} Conversion</Badge>}
           </div>
           <div className="p-6 h-[350px]">
             {funnelLoading ? (
-              <div className="w-full h-full flex items-center justify-center animate-pulse bg-slate-50/50 rounded-xl">Loading...</div>
+              <div className="w-full h-full flex items-center justify-center animate-pulse bg-slate-50/50 dark:bg-slate-800/50 rounded-xl">Loading...</div>
             ) : funnelChartData.length === 0 ? (
               <div className="w-full h-full flex items-center justify-center text-slate-400">No funnel data available.</div>
             ) : (
@@ -284,63 +314,65 @@ export function Analytics() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Inventory Breakdown */}
-        <Card className="border border-slate-200/60 shadow-md rounded-2xl overflow-hidden bg-white">
-          <div className="p-6 border-b border-slate-100 flex items-center gap-2">
-            <PieChartIcon className="w-5 h-5 text-amber-500" />
-            <h2 className="text-xl font-bold text-slate-800 tracking-tight">Inventory Distribution</h2>
+        {/* Inventory Overall Pie */}
+        <Card className="border border-slate-200/60 dark:border-slate-800 shadow-md rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+            <PieChartIcon className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Overall Inventory</h2>
           </div>
           <div className="p-6 h-[320px]">
             {inventoryLoading ? (
               <div className="w-full h-full flex items-center justify-center text-slate-400">Loading...</div>
-            ) : Array.isArray(inventoryData) && inventoryData.length > 0 ? (
+            ) : inventoryPieData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                {inventoryData[0].Total !== undefined ? ( // If it's the project-level array
-                  <BarChart data={inventoryData.slice(0, 5)} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                    <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none' }} />
-                    <Legend iconType="circle" />
-                    <Bar dataKey="Available" stackId="a" fill="#10b981" radius={[0, 0, 4, 4]} barSize={32} />
-                    <Bar dataKey="Booked" stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                ) : ( // Global object pie chart
-                  <PieChart>
-                    <Pie data={inventoryData} cx="50%" cy="45%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
-                      {inventoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                  </PieChart>
-                )}
+                <PieChart>
+                  <Pie data={inventoryPieData} cx="50%" cy="45%" innerRadius={55} outerRadius={90} paddingAngle={5} dataKey="value">
+                    {inventoryPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                </PieChart>
               </ResponsiveContainer>
             ) : (
               <div className="text-center text-slate-400 mt-20">No inventory data.</div>
             )}
           </div>
+          {inventoryOverall && !inventoryLoading && (
+            <div className="border-t border-slate-100 dark:border-slate-800 px-6 py-3 grid grid-cols-3 gap-2">
+              {[
+                { label: 'Total', value: inventoryOverall.total, color: 'text-slate-800 dark:text-slate-100' },
+                { label: 'Available', value: inventoryOverall.available, color: 'text-emerald-600 dark:text-emerald-400' },
+                { label: 'Booked', value: inventoryOverall.booked, color: 'text-amber-600 dark:text-amber-400' },
+              ].map(stat => (
+                <div key={stat.label} className="text-center">
+                  <p className={`text-lg font-bold ${stat.color}`}>{stat.value}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         {/* Lead Source ROI */}
-        <Card className="lg:col-span-2 border border-slate-200/60 shadow-md rounded-2xl overflow-hidden bg-white">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <Card className="lg:col-span-2 border border-slate-200/60 dark:border-slate-800 shadow-md rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Megaphone className="w-5 h-5 text-rose-500" />
-              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Lead Source ROI</h2>
+              <Megaphone className="w-5 h-5 text-rose-500 dark:text-rose-400" />
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Lead Source ROI</h2>
             </div>
           </div>
           <div className="overflow-x-auto p-0">
             <Table>
-              <TableHeader className="bg-slate-50/80 hover:bg-slate-50 border-b border-slate-100">
+              <TableHeader className="bg-slate-50/80 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-b border-slate-100 dark:border-slate-800">
                 <TableRow>
-                  <TableHead className="py-4 font-semibold text-slate-600 pl-6">Source Channel</TableHead>
-                  <TableHead className="py-4 font-semibold text-slate-600 text-right">Leads</TableHead>
-                  <TableHead className="py-4 font-semibold text-slate-600 text-right">Site Visits</TableHead>
-                  <TableHead className="py-4 font-semibold text-slate-600 text-right">Bookings</TableHead>
-                  <TableHead className="py-4 font-semibold text-slate-600 text-right">Visit Rate</TableHead>
-                  <TableHead className="py-4 font-semibold text-slate-600 text-right pr-6">Booking Rate</TableHead>
+                  <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 pl-6">Source Channel</TableHead>
+                  <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 text-right">Leads</TableHead>
+                  <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 text-right">Site Visits</TableHead>
+                  <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 text-right">Bookings</TableHead>
+                  <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 text-right">Visit Rate</TableHead>
+                  <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 text-right pr-6">Booking Rate</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -348,16 +380,16 @@ export function Analytics() {
                   <TableRow><TableCell colSpan={6} className="text-center py-10 text-slate-400 animate-pulse">Loading sources...</TableCell></TableRow>
                 ) : leadSources?.results?.length ? (
                   leadSources.results.map((source) => (
-                    <TableRow key={source.source} className="hover:bg-slate-50/50">
-                      <TableCell className="font-semibold text-slate-800 pl-6">{source.source.replace(/_/g, ' ').toUpperCase()}</TableCell>
-                      <TableCell className="text-right font-medium text-slate-600">{source.leads}</TableCell>
-                      <TableCell className="text-right font-medium text-slate-600">{source.site_visits}</TableCell>
-                      <TableCell className="text-right font-bold text-slate-800">{source.bookings}</TableCell>
+                    <TableRow key={source.source} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 border-b dark:border-slate-800">
+                      <TableCell className="font-semibold text-slate-800 dark:text-slate-200 pl-6">{source.source.replace(/_/g, ' ').toUpperCase()}</TableCell>
+                      <TableCell className="text-right font-medium text-slate-600 dark:text-slate-300">{source.leads}</TableCell>
+                      <TableCell className="text-right font-medium text-slate-600 dark:text-slate-300">{source.site_visits}</TableCell>
+                      <TableCell className="text-right font-bold text-slate-800 dark:text-slate-200">{source.bookings}</TableCell>
                       <TableCell className="text-right">
-                        <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-xs font-semibold">{formatPercent(source.visit_rate)}</span>
+                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md text-xs font-semibold">{formatPercent(source.visit_rate)}</span>
                       </TableCell>
                       <TableCell className="text-right pr-6">
-                        <Badge className={source.booking_rate >= 10 ? 'bg-emerald-100 text-emerald-700 border-none' : 'bg-slate-100 text-slate-600 border-none'}>
+                        <Badge className={source.booking_rate >= 10 ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-none'}>
                           {formatPercent(source.booking_rate)}
                         </Badge>
                       </TableCell>
@@ -372,24 +404,97 @@ export function Analytics() {
         </Card>
       </div>
 
+      {/* Inventory By Project */}
+      {(inventoryByProject.length > 0 || inventoryLoading) && (
+        <Card className="border border-slate-200/60 dark:border-slate-800 shadow-md rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+            <Building className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Inventory by Project</h2>
+          </div>
+
+          {inventoryLoading ? (
+            <div className="p-6 h-[200px] flex items-center justify-center animate-pulse text-slate-400">Loading project data...</div>
+          ) : (
+            <>
+              {/* Bar Chart */}
+              <div className="p-6 h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={inventoryBarData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: 'rgba(99,102,241,0.05)' }} contentStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                    <Legend iconType="circle" />
+                    <Bar dataKey="Available" fill="#10b981" barSize={20} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Booked" fill="#f59e0b" barSize={20} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Reserved" fill="#6366f1" barSize={20} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Sold" fill="#64748b" barSize={20} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto border-t border-slate-100 dark:border-slate-800">
+                <Table>
+                  <TableHeader className="bg-slate-50/80 dark:bg-slate-800/50">
+                    <TableRow>
+                      <TableHead className="pl-6 py-3 font-semibold text-slate-600 dark:text-slate-300">Project</TableHead>
+                      <TableHead className="text-right py-3 font-semibold text-slate-600 dark:text-slate-300">Total</TableHead>
+                      <TableHead className="text-right py-3 font-semibold text-emerald-600 dark:text-emerald-400">Available</TableHead>
+                      <TableHead className="text-right py-3 font-semibold text-amber-600 dark:text-amber-400">Booked</TableHead>
+                      <TableHead className="text-right py-3 font-semibold text-indigo-600 dark:text-indigo-400">Reserved</TableHead>
+                      <TableHead className="text-right py-3 font-semibold text-slate-500 dark:text-slate-400">Sold</TableHead>
+                      <TableHead className="text-right py-3 pr-6 font-semibold text-purple-600 dark:text-purple-400">Registered</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {inventoryByProject.map((project: any) => (
+                      <TableRow key={project.project_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 border-b dark:border-slate-800">
+                        <TableCell className="pl-6 font-semibold text-slate-800 dark:text-slate-200">{project.project_name}</TableCell>
+                        <TableCell className="text-right font-bold text-slate-700 dark:text-slate-300">{project.total}</TableCell>
+                        <TableCell className="text-right">
+                          <span className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded font-semibold text-sm">{project.available}</span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <span className="bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded font-semibold text-sm">{project.booked}</span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <span className="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded font-semibold text-sm">{project.reserved}</span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-semibold text-sm">{project.sold}</span>
+                        </TableCell>
+                        <TableCell className="text-right pr-6">
+                          <span className="bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded font-semibold text-sm">{project.registered}</span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
+        </Card>
+      )}
+
       {/* Agent Leaderboard */}
-      <Card className="border border-slate-200/60 shadow-md rounded-2xl overflow-hidden bg-white">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+      <Card className="border border-slate-200/60 dark:border-slate-800 shadow-md rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-500" />
-            <h2 className="text-xl font-bold text-slate-800 tracking-tight">Team Performance Leaderboard</h2>
+            <Trophy className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Team Performance Leaderboard</h2>
           </div>
         </div>
         <div className="overflow-x-auto p-0">
           <Table>
-            <TableHeader className="bg-slate-50/80 hover:bg-slate-50 border-b border-slate-100">
+            <TableHeader className="bg-slate-50/80 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-b border-slate-100 dark:border-slate-800">
               <TableRow>
-                <TableHead className="py-4 font-semibold text-slate-600 pl-6 w-16">Rank</TableHead>
-                <TableHead className="py-4 font-semibold text-slate-600">Sales Agent</TableHead>
-                <TableHead className="py-4 font-semibold text-slate-600 text-right">Leads Claimed</TableHead>
-                <TableHead className="py-4 font-semibold text-slate-600 text-right">Site Visits</TableHead>
-                <TableHead className="py-4 font-semibold text-slate-600 text-right">Total Bookings</TableHead>
-                <TableHead className="py-4 font-semibold text-slate-600 text-right pr-6">Conversion</TableHead>
+                <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 pl-6 w-16">Rank</TableHead>
+                <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300">Sales Agent</TableHead>
+                <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 text-right">Leads Claimed</TableHead>
+                <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 text-right">Site Visits</TableHead>
+                <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 text-right">Total Bookings</TableHead>
+                <TableHead className="py-4 font-semibold text-slate-600 dark:text-slate-300 text-right pr-6">Conversion</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -397,13 +502,13 @@ export function Analytics() {
                 <TableRow><TableCell colSpan={6} className="text-center py-10 text-slate-400 animate-pulse">Loading leaderboard...</TableCell></TableRow>
               ) : agentLeaderboard?.results?.length ? (
                 agentLeaderboard.results.map((agent) => (
-                  <TableRow key={agent.user_id} className="hover:bg-slate-50/50">
+                  <TableRow key={agent.user_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 border-b dark:border-slate-800">
                     <TableCell className="pl-6">
                       {agent.rank <= 3 ? (
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-sm
-                                                    ${agent.rank === 1 ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                            agent.rank === 2 ? 'bg-slate-200 text-slate-600 border border-slate-300' :
-                              'bg-orange-100 text-orange-700 border border-orange-200'}
+                                                    ${agent.rank === 1 ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' :
+                            agent.rank === 2 ? 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-600' :
+                              'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30'}
                                                 `}>
                           #{agent.rank}
                         </div>
@@ -413,12 +518,12 @@ export function Analytics() {
                         </div>
                       )}
                     </TableCell>
-                    <TableCell className="font-bold text-slate-800">{agent.name || `User ID ${agent.user_id}`}</TableCell>
-                    <TableCell className="text-right font-medium text-slate-600">{agent.leads_assigned}</TableCell>
-                    <TableCell className="text-right font-medium text-slate-600">{agent.site_visits}</TableCell>
-                    <TableCell className="text-right font-black text-slate-800">{agent.bookings}</TableCell>
+                    <TableCell className="font-bold text-slate-800 dark:text-slate-200">{agent.name || `User ID ${agent.user_id}`}</TableCell>
+                    <TableCell className="text-right font-medium text-slate-600 dark:text-slate-300">{agent.leads_assigned}</TableCell>
+                    <TableCell className="text-right font-medium text-slate-600 dark:text-slate-300">{agent.site_visits}</TableCell>
+                    <TableCell className="text-right font-black text-slate-800 dark:text-slate-100">{agent.bookings}</TableCell>
                     <TableCell className="text-right pr-6">
-                      <Badge className={agent.conversion_rate >= 15 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-50 text-slate-600 border border-slate-200'}>
+                      <Badge className={agent.conversion_rate >= 15 ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'}>
                         {formatPercent(agent.conversion_rate)}
                       </Badge>
                     </TableCell>

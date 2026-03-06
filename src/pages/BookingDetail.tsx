@@ -1,40 +1,42 @@
 // src/pages/BookingDetail.tsx
-import { useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useBookings } from '@/hooks/useBookings';
-import { useCurrency } from '@/hooks/useCurrency';
 import { BookingFormDrawer } from '@/components/bookings/BookingFormDrawer';
 import { MilestonePaymentDialog } from '@/components/bookings/MilestonePaymentDialog';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
-import {
-  ArrowLeft,
-  Pencil,
-  User,
-  Home,
-  Calendar,
-  Banknote,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-} from 'lucide-react';
-import { toast } from 'sonner';
+import { useBookings } from '@/hooks/useBookings';
+import { useCurrency } from '@/hooks/useCurrency';
 import type {
-  Booking,
-  PaymentMilestone,
   CreateBookingPayload,
   MarkMilestonePaidPayload,
+  PaymentMilestone
 } from '@/types/bookingTypes';
 import {
-  BookingStatusEnum,
-  MilestoneStatusEnum,
   BOOKING_STATUS_COLORS,
   BOOKING_STATUS_LABELS,
   MILESTONE_STATUS_COLORS,
+  MilestoneStatusEnum
 } from '@/types/bookingTypes';
+import { generateDemandLetterPDF, generateReceiptPDF } from '@/utils/pdfGenerator';
+import { format } from 'date-fns';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Banknote,
+  Calendar,
+  CheckCircle,
+  Clock,
+  FileDown,
+  Home,
+  Loader2,
+  Pencil,
+  Receipt,
+  User,
+} from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export function BookingDetail() {
   const { id } = useParams<{ id: string }>();
@@ -46,9 +48,13 @@ export function BookingDetail() {
     useMilestones,
     updateBooking,
     markMilestonePaid,
+    getDemandLetterData,
+    getReceiptData,
     isLoading: isMutating,
   } = useBookings();
   const { formatCurrency } = useCurrency();
+  const [isGeneratingDL, setIsGeneratingDL] = useState(false);
+  const [generatingReceiptId, setGeneratingReceiptId] = useState<number | null>(null);
 
   const { data: booking, isLoading: bookingLoading, mutate: refreshBooking } = useBooking(bookingId);
   const { data: milestones, isLoading: milestonesLoading, mutate: refreshMilestones } = useMilestones(bookingId);
@@ -96,6 +102,34 @@ export function BookingDetail() {
     },
     [bookingId, selectedMilestone, markMilestonePaid, refreshBooking, refreshMilestones]
   );
+
+  const handleDownloadDemandLetter = useCallback(async () => {
+    if (!bookingId) return;
+    setIsGeneratingDL(true);
+    try {
+      const data = await getDemandLetterData(bookingId);
+      generateDemandLetterPDF(data);
+      toast.success('Demand Letter PDF downloaded');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to generate demand letter');
+    } finally {
+      setIsGeneratingDL(false);
+    }
+  }, [bookingId, getDemandLetterData]);
+
+  const handleDownloadReceipt = useCallback(async (milestoneId: number) => {
+    if (!bookingId) return;
+    setGeneratingReceiptId(milestoneId);
+    try {
+      const data = await getReceiptData(bookingId, milestoneId);
+      generateReceiptPDF(data);
+      toast.success('Payment Receipt PDF downloaded');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to generate receipt');
+    } finally {
+      setGeneratingReceiptId(null);
+    }
+  }, [bookingId, getReceiptData]);
 
   const getMilestoneStatusIcon = (status: MilestoneStatusEnum) => {
     switch (status) {
@@ -164,10 +198,25 @@ export function BookingDetail() {
             </p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setEditDrawerOpen(true)}>
-          <Pencil className="h-3.5 w-3.5 mr-1.5" />
-          Edit Booking
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownloadDemandLetter}
+            disabled={isGeneratingDL}
+          >
+            {isGeneratingDL ? (
+              <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <FileDown className="h-3.5 w-3.5 mr-1.5" />
+            )}
+            Demand Letter
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setEditDrawerOpen(true)}>
+            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+            Edit Booking
+          </Button>
+        </div>
       </div>
 
       {/* Info Cards */}
@@ -209,8 +258,8 @@ export function BookingDetail() {
                   {booking.payment_plan_type === '20_80'
                     ? '20:80 Plan'
                     : booking.payment_plan_type === 'CONSTRUCTION_LINKED'
-                    ? 'Construction Linked'
-                    : booking.payment_plan_type || '-'}
+                      ? 'Construction Linked'
+                      : booking.payment_plan_type || '-'}
                 </p>
               </div>
               {booking.remarks && (
@@ -300,7 +349,7 @@ export function BookingDetail() {
                     {Math.round(
                       (parseFloat(booking.total_collected || '0') /
                         parseFloat(booking.total_amount)) *
-                        100
+                      100
                     )}
                     %
                   </span>
@@ -313,7 +362,7 @@ export function BookingDetail() {
                         100,
                         (parseFloat(booking.total_collected || '0') /
                           parseFloat(booking.total_amount)) *
-                          100
+                        100
                       )}%`,
                     }}
                   />
@@ -427,18 +476,36 @@ export function BookingDetail() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        {(milestone.status === MilestoneStatusEnum.PENDING ||
-                          milestone.status === MilestoneStatusEnum.OVERDUE ||
-                          milestone.status === MilestoneStatusEnum.PARTIALLY_PAID) && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 text-xs"
-                            onClick={() => handleMarkPaid(milestone)}
-                          >
-                            Mark as Paid
-                          </Button>
-                        )}
+                        <div className="flex items-center justify-end gap-1.5">
+                          {(milestone.status === MilestoneStatusEnum.PENDING ||
+                            milestone.status === MilestoneStatusEnum.OVERDUE ||
+                            milestone.status === MilestoneStatusEnum.PARTIALLY_PAID) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs"
+                                onClick={() => handleMarkPaid(milestone)}
+                              >
+                                Mark as Paid
+                              </Button>
+                            )}
+                          {milestone.status === MilestoneStatusEnum.PAID && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-500/10"
+                              onClick={() => handleDownloadReceipt(milestone.id)}
+                              disabled={generatingReceiptId === milestone.id}
+                            >
+                              {generatingReceiptId === milestone.id ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <Receipt className="h-3 w-3 mr-1" />
+                              )}
+                              Receipt
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

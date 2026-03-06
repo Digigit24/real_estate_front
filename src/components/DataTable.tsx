@@ -1,17 +1,5 @@
 // src/components/DataTable.tsx
 
-import React, { useState } from 'react';
-import { useIsMobile } from '@/hooks/use-is-mobile';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,13 +10,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import {
   Pagination,
   PaginationContent,
@@ -37,8 +28,17 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { MoreHorizontal, Eye, Edit, Trash2, Stethoscope, IndianRupee, ArrowUpDown, ArrowUp, ArrowDown, Filter, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useIsMobile } from '@/hooks/use-is-mobile';
+import { ArrowDown, ArrowUp, ArrowUpDown, Edit, Eye, Filter, IndianRupee, MoreHorizontal, Stethoscope, Trash2, X } from 'lucide-react';
+import React, { useState } from 'react';
 
 // --------------------------------------
 // Types
@@ -418,8 +418,23 @@ export function DataTable<T>({
                 billing: onBilling ? () => onBilling(row) : undefined,
               };
 
+              const handleRowClick = () => {
+                if (onRowClick) {
+                  onRowClick(row);
+                } else if (onView) {
+                  onView(row);
+                }
+              };
+
+              const isRowClickable = !!(onRowClick || onView);
+              const extraRowClass = rowClassName ? rowClassName(row) : '';
+
               return (
-                <div key={getRowId(row)} className="bg-card border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow">
+                <div
+                  key={getRowId(row)}
+                  className={`bg-card border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow ${isRowClickable ? 'cursor-pointer' : ''} ${extraRowClass}`}
+                  onClick={isRowClickable ? handleRowClick : undefined}
+                >
                   {renderMobileCard(row, rowActions)}
                 </div>
               );
@@ -580,11 +595,10 @@ export function DataTable<T>({
                             <Button
                               variant="ghost"
                               size="icon"
-                              className={`h-6 w-6 ml-auto ${
-                                getFilterValue(col.key)
+                              className={`h-6 w-6 ml-auto ${getFilterValue(col.key)
                                   ? 'text-primary'
                                   : 'text-muted-foreground opacity-0 group-hover:opacity-100'
-                              }`}
+                                }`}
                             >
                               <Filter className="h-3.5 w-3.5" />
                             </Button>

@@ -404,7 +404,8 @@ export interface CreateLeadActivityPayload {
   type: ActivityTypeEnum;
   content?: string;
   happened_at: string;
-  meta?: Record<string, any>;
+  by_user_id?: string;
+  meta?: string;
   file_url?: string;
 }
 

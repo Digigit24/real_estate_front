@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { SideDrawer } from '@/components/SideDrawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Tower, CreateTowerPayload } from '@/types/inventoryTypes';
+import { CreateTowerPayload, Tower } from '@/types/inventoryTypes';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const towerSchema = z.object({
   name: z.string().min(1, 'Tower name is required'),

@@ -1,6 +1,16 @@
 // src/pages/BrokerDetail.tsx
-import { BrokerFormDrawer } from '@/components/brokers/BrokerFormDrawer';
+import { CommissionFormDrawer } from '@/components/brokers/CommissionFormDrawer';
 import { DataTable, DataTableColumn } from '@/components/DataTable';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBrokers } from '@/hooks/useBrokers';
 import { useCurrency } from '@/hooks/useCurrency';
-import type { Commission, CreateBrokerPayload } from '@/types/brokerTypes';
+import type { Commission, CreateBrokerPayload, CreateCommissionPayload, UpdateCommissionPayload } from '@/types/brokerTypes';
 import {
     BROKER_STATUS_COLORS,
     BROKER_STATUS_LABELS,
@@ -22,12 +32,14 @@ import {
     Banknote,
     Building2,
     CheckCircle,
+    Edit,
     FileText,
     Mail,
     MapPin,
     Pencil,
     Percent,
     Phone,
+    Trash2,
     Users,
     XCircle,
 } from 'lucide-react';
@@ -45,6 +57,9 @@ export function BrokerDetail() {
         useBrokerLeads,
         useBrokerCommissions,
         updateBroker,
+        createCommission,
+        updateCommission,
+        deleteCommission,
         markCommissionPaid,
         isLoading: isMutating,
     } = useBrokers();
@@ -56,6 +71,12 @@ export function BrokerDetail() {
 
     // Edit drawer state
     const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+    const [createCommissionDrawerOpen, setCreateCommissionDrawerOpen] = useState(false);
+    const [commissionToEdit, setCommissionToEdit] = useState<Commission | null>(null);
+
+    // Delete confirmation
+    const [deleteCommissionDialogOpen, setDeleteCommissionDialogOpen] = useState(false);
+    const [commissionToDelete, setCommissionToDelete] = useState<Commission | null>(null);
 
     const handleEditSubmit = useCallback(
         async (data: CreateBrokerPayload) => {
@@ -97,7 +118,8 @@ export function BrokerDetail() {
     const handleMarkPaid = useCallback(
         async (commissionId: number) => {
             try {
-                await markCommissionPaid(commissionId);
+                const today = new Date().toISOString().split('T')[0];
+                await markCommissionPaid(commissionId, today);
                 toast.success('Commission marked as paid');
                 refreshCommissions();
             } catch (err: any) {
@@ -106,6 +128,44 @@ export function BrokerDetail() {
         },
         [markCommissionPaid, refreshCommissions]
     );
+
+    const handleCommissionFormSubmit = useCallback(
+        async (data: CreateCommissionPayload | UpdateCommissionPayload) => {
+            try {
+                if (commissionToEdit) {
+                    await updateCommission(commissionToEdit.id, data as UpdateCommissionPayload);
+                    toast.success('Commission updated successfully');
+                } else {
+                    await createCommission(data as CreateCommissionPayload);
+                    toast.success('Commission created successfully');
+                }
+                setCreateCommissionDrawerOpen(false);
+                setCommissionToEdit(null);
+                refreshCommissions();
+            } catch (err: any) {
+                toast.error(err.message || 'Failed to save commission');
+            }
+        },
+        [createCommission, updateCommission, commissionToEdit, refreshCommissions]
+    );
+
+    const handleDeleteCommissionConfirm = useCallback((commission: Commission) => {
+        setCommissionToDelete(commission);
+        setDeleteCommissionDialogOpen(true);
+    }, []);
+
+    const handleDeleteCommission = useCallback(async () => {
+        if (!commissionToDelete) return;
+        try {
+            await deleteCommission(commissionToDelete.id);
+            toast.success('Commission deleted successfully');
+            setDeleteCommissionDialogOpen(false);
+            setCommissionToDelete(null);
+            refreshCommissions();
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to delete commission');
+        }
+    }, [commissionToDelete, deleteCommission, refreshCommissions]);
 
     // Leads table columns
     const leadColumns: DataTableColumn<any>[] = [
@@ -161,7 +221,7 @@ export function BrokerDetail() {
             cell: (commission) => (
                 <div className="flex flex-col">
                     <span className="font-medium">
-                        {commission.booking_unit || `Booking #${commission.booking}`}
+                        {commission.unit_number || `Booking #${commission.booking}`}
                     </span>
                 </div>
             ),
@@ -211,18 +271,42 @@ export function BrokerDetail() {
         {
             header: 'Actions',
             key: 'actions',
-            cell: (commission) =>
-                commission.status === CommissionStatusEnum.PENDING ? (
+            cell: (commission) => (
+                <div className="flex gap-2 items-center">
+                    {commission.status === CommissionStatusEnum.PENDING && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs"
+                            onClick={() => handleMarkPaid(commission.id)}
+                            disabled={isMutating}
+                        >
+                            Mark Paid
+                        </Button>
+                    )}
                     <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={() => handleMarkPaid(commission.id)}
-                        disabled={isMutating}
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        onClick={() => {
+                            setCommissionToEdit(commission);
+                            setCreateCommissionDrawerOpen(true);
+                        }}
                     >
-                        Mark Paid
+                        <Edit className="h-4 w-4" />
                     </Button>
-                ) : null,
+                    {commission.status === CommissionStatusEnum.PENDING && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteCommissionConfirm(commission)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    )}
+                </div>
+            ),
         },
     ];
 
@@ -258,7 +342,7 @@ export function BrokerDetail() {
             <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm truncate">
-                        {commission.booking_unit || `Booking #${commission.booking}`}
+                        {commission.unit_number || `Booking #${commission.booking}`}
                     </h3>
                     <p className="text-xs text-muted-foreground">{commission.lead_name || 'N/A'}</p>
                 </div>
@@ -273,18 +357,41 @@ export function BrokerDetail() {
                     {commission.status}
                 </Badge>
             </div>
-            <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
                 <span className="text-sm font-semibold">{formatCurrency(commission.amount || '0')}</span>
-                {commission.status === CommissionStatusEnum.PENDING && (
+                <div className="flex gap-2">
+                    {commission.status === CommissionStatusEnum.PENDING && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs"
+                            onClick={() => handleMarkPaid(commission.id)}
+                        >
+                            Mark Paid
+                        </Button>
+                    )}
                     <Button
-                        variant="outline"
                         size="sm"
-                        className="h-7 text-xs"
-                        onClick={() => handleMarkPaid(commission.id)}
+                        variant="outline"
+                        className="h-7 text-xs px-2"
+                        onClick={() => {
+                            setCommissionToEdit(commission);
+                            setCreateCommissionDrawerOpen(true);
+                        }}
                     >
-                        Mark Paid
+                        <Edit className="h-3.5 w-3.5" />
                     </Button>
-                )}
+                    {commission.status === CommissionStatusEnum.PENDING && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs px-2 text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDeleteCommissionConfirm(commission)}
+                        >
+                            <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                    )}
+                </div>
             </div>
         </>
     );
@@ -469,6 +576,15 @@ export function BrokerDetail() {
                     </TabsTrigger>
                 </TabsList>
 
+                <div className="flex justify-end mb-2">
+                    <Button size="sm" onClick={() => {
+                        setCommissionToEdit(null);
+                        setCreateCommissionDrawerOpen(true);
+                    }}>
+                        Add Commission
+                    </Button>
+                </div>
+
                 <TabsContent value="leads">
                     <div className="border rounded-lg overflow-hidden">
                         <DataTable
@@ -495,6 +611,7 @@ export function BrokerDetail() {
                             getRowLabel={(commission) => commission.broker_name || `Commission #${commission.id}`}
                             emptyTitle="No commissions"
                             emptySubtitle="No commissions recorded for this broker"
+                            onRowClick={(commission) => navigate(`/brokers/commissions/${commission.id}`)}
                         />
                     </div>
                 </TabsContent>
@@ -512,12 +629,37 @@ export function BrokerDetail() {
                 </div>
             )}
 
-            {/* Edit Broker Drawer */}
-            <BrokerFormDrawer
-                open={editDrawerOpen}
-                onOpenChange={setEditDrawerOpen}
-                broker={broker}
-                onSubmit={handleEditSubmit}
+            <AlertDialog open={deleteCommissionDialogOpen} onOpenChange={setDeleteCommissionDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Commission</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this commission record?
+                            This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isMutating}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={handleDeleteCommission}
+                            disabled={isMutating}
+                        >
+                            {isMutating ? 'Deleting...' : 'Delete'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <CommissionFormDrawer
+                open={createCommissionDrawerOpen}
+                onOpenChange={(open) => {
+                    setCreateCommissionDrawerOpen(open);
+                    if (!open) setTimeout(() => setCommissionToEdit(null), 300);
+                }}
+                commission={commissionToEdit}
+                mode={commissionToEdit ? 'edit' : 'create'}
+                onSubmit={handleCommissionFormSubmit}
                 isSubmitting={isMutating}
             />
         </div>

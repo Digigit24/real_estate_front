@@ -1,29 +1,15 @@
 // src/components/activity-drawer/ActivityInfo-Advanced.tsx
 // This version has a SEARCHABLE dropdown for better UX when you have many leads
 
-import { forwardRef, useImperativeHandle, useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
 
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import {
   Command,
   CommandEmpty,
@@ -31,20 +17,35 @@ import {
   CommandInput,
   CommandItem,
 } from '@/components/ui/command';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-import type { LeadActivity, CreateLeadActivityPayload, ActivityTypeEnum } from '@/types/crmTypes';
-import type { ActivityFormHandle } from '../ActivitiesFormDrawer';
 import { useAuth } from '@/hooks/useAuth';
 import { useCRM } from '@/hooks/useCRM';
+import type { ActivityTypeEnum, CreateLeadActivityPayload, LeadActivity } from '@/types/crmTypes';
 import { ACTIVITY_TYPE_OPTIONS } from '@/types/crmTypes';
+import type { ActivityFormHandle } from '../ActivitiesFormDrawer';
 
 const activitySchema = z.object({
   lead: z.number().min(1, 'Lead is required'),
   type: z.enum(['CALL', 'EMAIL', 'MEETING', 'NOTE', 'SMS', 'OTHER']),
   content: z.string().optional(),
   happened_at: z.string().min(1, 'Date and time is required'),
+  by_user_id: z.coerce.string().optional(),
   meta: z.record(z.any()).optional(),
   file_url: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
@@ -120,7 +121,8 @@ const ActivityInfo = forwardRef<ActivityFormHandle, ActivityInfoProps>(
                 type: data.type as ActivityTypeEnum,
                 content: data.content || undefined,
                 happened_at: data.happened_at,
-                meta: Object.keys(data.meta || {}).length > 0 ? data.meta : undefined,
+                by_user_id: data.by_user_id ? String(data.by_user_id) : undefined,
+                meta: Object.keys(data.meta || {}).length > 0 ? JSON.stringify(data.meta) : undefined,
                 file_url: data.file_url || undefined,
               };
               resolve(cleanData);
