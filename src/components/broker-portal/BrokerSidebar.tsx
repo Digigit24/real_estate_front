@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -10,12 +9,7 @@ import {
     Rocket,
     PanelLeftClose,
     PanelLeft,
-    ClipboardList,
-    Activity,
-    Settings,
-    Building2,
-    Grid3X3,
-    CreditCard,
+    DollarSign,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -32,6 +26,7 @@ interface MenuSection {
     items: MenuItem[];
 }
 
+// Only show pages that have matching /brokers/portal/* backend endpoints
 const menuSections: MenuSection[] = [
     {
         items: [
@@ -44,45 +39,16 @@ const menuSections: MenuSection[] = [
         ],
     },
     {
-        label: "LEADS MANAGEMENT",
+        label: "LEADS",
         items: [
             { id: "my-leads", label: "My Leads", icon: Users, path: "/broker-portal/my-leads" },
             { id: "submit-lead", label: "Submit Lead", icon: FilePlus, path: "/broker-portal/submit-lead" },
         ],
     },
     {
-        label: "STATUS & ACTIVITIES",
+        label: "FINANCE",
         items: [
-            { id: "statuses", label: "Pipeline Statuses", icon: ClipboardList, path: "/broker-portal/statuses" },
-            { id: "activities", label: "Activities Log", icon: Activity, path: "/broker-portal/activities" },
-            { id: "fields", label: "Field Configs", icon: Settings, path: "/broker-portal/field-configs" },
-        ],
-    },
-    {
-        label: "WORKFLOW",
-        items: [
-            { id: "tasks", label: "Tasks", icon: ClipboardList, path: "/broker-portal/tasks" },
-            { id: "meetings", label: "Meetings", icon: Users, path: "/broker-portal/meetings" },
-        ],
-    },
-    {
-        label: "INVENTORY",
-        items: [
-            { id: "projects", label: "Projects", icon: Building2, path: "/broker-portal/inventory" },
-            { id: "units", label: "All Units", icon: Grid3X3, path: "/broker-portal/inventory/units" },
-        ],
-    },
-    {
-        label: "BOOKINGS & FINANCE",
-        items: [
-            { id: "bookings", label: "Bookings", icon: CreditCard, path: "/broker-portal/bookings" },
-            { id: "payments", label: "Payments Ledger", icon: CreditCard, path: "/broker-portal/payments" },
-        ],
-    },
-    {
-        label: "NETWORK",
-        items: [
-            { id: "network", label: "Network Directory", icon: Users, path: "/broker-portal/network" },
+            { id: "commissions", label: "My Commissions", icon: DollarSign, path: "/broker-portal/my-commissions" },
         ],
     },
     {
